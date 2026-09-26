@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Document type** | Concept note (draft for discussion) |
-| **Version** | 0.2: adds process-by-process feature design and the positioning over existing POS and ERP systems |
+| **Version** | 0.3: adds management roles, users and usability for each service (Section 7) and the barista / coffee station process (R15). v0.2 added the process-by-process feature design and positioning over existing POS and ERP systems. |
 | **Date** | September 2026 |
 | **Scope** | Point-of-sale (POS) and store-management platform for three verticals: supermarkets / grocery, bars / pubs / lounges, and resto-bars (restaurant + bar hybrids) |
 | **Basis** | (a) How these businesses run each process manually today; (b) the features of POS platforms in wide use (Toast, Square, Lightspeed, Clover, TouchBistro, Revel, Shift4/SkyTab, Oracle MICROS Simphony, NCR Voyix/Aloha, IT Retail, LOC, and bar-inventory tools such as BinWise and BevSpot); (c) the features of ERP systems with POS or retail modules (Odoo, ERPNext, LS Central on Microsoft Dynamics 365 Business Central, Microsoft Dynamics 365 Commerce, SAP, Oracle Retail Xstore). See **Sources**. |
@@ -22,17 +22,27 @@
    - 6.2 Bar / pub / lounge
    - 6.3 Resto-bar
    - 6.4 Shared back-office and ERP processes
-7. Solution architecture and core modules
-8. Hardware concept
-9. Payments, security and compliance
-10. Integrations and ERP connectors
-11. Key reports and KPIs
-12. Implementation approach
-13. Commercial model
-14. Indicative cost components
-15. Risks and mitigation
-16. Success measures
-17. Conclusion and next steps
+7. People: management roles, users and usability
+   - 7.1 Who runs and uses the system in each business
+   - 7.2 Role-by-role design: supermarket
+   - 7.3 Role-by-role design: bar
+   - 7.4 Role-by-role design: resto-bar and café
+   - 7.5 Permissions and approval matrix
+   - 7.6 Management routines built into the system
+   - 7.7 Usability by working environment
+   - 7.8 Usability principles and accessibility
+   - 7.9 Staff experience and adoption
+8. Solution architecture and core modules
+9. Hardware concept
+10. Payments, security and compliance
+11. Integrations and ERP connectors
+12. Key reports and KPIs
+13. Implementation approach
+14. Commercial model
+15. Indicative cost components
+16. Risks and mitigation
+17. Success measures
+18. Conclusion and next steps
 - Appendix A: Feature matrix by mode
 - Appendix B: Glossary
 - Sources
@@ -51,7 +61,7 @@ This concept note proposes a **single cloud-native, offline-first POS platform**
 - **Better than ERP POS modules:** fast checkout and service screens, and deep supermarket, bar and resto-bar workflows.
 - **Able to run on top of what the customer already has:** it can run as a complete system, as a front end to an existing ERP, or as an **intelligence and control layer** over an existing POS and ERP (Section 5).
 
-The platform has a shared core (sales, payments, inventory, customers, staff, reporting) and **three vertical modes**: Supermarket, Bar and Resto-bar. A business switches on one or more. Section 6 designs every major business process in detail: how it is done manually today, what existing POS and ERP systems provide, where the gaps are, and the specific features this platform will provide.
+The platform has a shared core (sales, payments, inventory, customers, staff, reporting) and **three vertical modes**: Supermarket, Bar and Resto-bar. A business switches on one or more. Section 6 designs every major business process in detail: how it is done manually today, what existing POS and ERP systems provide, where the gaps are, and the specific features this platform will provide. Section 7 designs the system around **the people who manage and use it**: owners, store, bar and restaurant managers, supervisors, cashiers, bartenders, baristas, servers, chefs, storekeepers and accountants. It covers role-specific screens, permissions, approval limits, daily management routines, and usability in each working environment, from a dark, noisy bar to a hot kitchen or a busy checkout lane.
 
 **Expected benefits** (targets to validate in the pilot):
 
@@ -59,7 +69,8 @@ The platform has a shared core (sales, payments, inventory, customers, staff, re
 - Inventory shrink and liquor variance reduced by tying every sale to stock depletion and surfacing variance daily.
 - Stock-outs and perishable waste reduced through AI-assisted ordering, expiry tracking and automatic markdowns.
 - No double entry between POS and ERP: one item master, automatic posting of sales, costs and cash to accounts.
-- Owners get real-time, multi-location visibility from a phone.
+- Owners get real-time, multi-location visibility from a phone; managers approve voids, refunds and orders remotely.
+- Every role is productive quickly: new frontline staff within one hour, with screens designed for their job and workplace.
 - Payment security and compliance handled by design (PCI DSS v4.0, P2PE / tokenisation, local fiscal / e-invoicing rules).
 
 ---
@@ -106,10 +117,10 @@ The platform has a shared core (sales, payments, inventory, customers, staff, re
 4. Catalogue or menu management with modifiers, variants and time-based pricing.
 5. Customer profiles, loyalty points, gift cards and marketing.
 6. Staff management: PIN login, roles and permissions, time clock, tip pooling.
-7. Kitchen and bar display (for example, Toast KDS, Lightspeed KDS, Odoo preparation display).
-8. Self-ordering by QR code and kiosk.
-9. Real-time dashboards on mobile; multi-location roll-ups.
-10. Open APIs and marketplaces for accounting, delivery, e-commerce, payroll and reservations.
+8. Kitchen and bar display (for example, Toast KDS, Lightspeed KDS, Odoo preparation display).
+9. Self-ordering by QR code and kiosk.
+10. Real-time dashboards on mobile; multi-location roll-ups.
+11. Open APIs and marketplaces for accounting, delivery, e-commerce, payroll and reservations.
 
 ### 3.3 Where existing systems commonly fall short (our opportunity)
 
@@ -156,7 +167,7 @@ The platform has a shared core (sales, payments, inventory, customers, staff, re
 | D2 | **ERP-grade controls with POS-grade speed.** Purchase approvals, three-way matching, credit control, audit trail, and multi-entity accounting, all behind a till that adds an item in under a second. | G3, G4 |
 | D3 | **Inventory engine for every unit type.** It handles pieces, cases, kilograms, millilitres, kegs and recipes. The same engine tracks a 750 ml bottle down to the pour and a cheese wheel down to the gram, with batch and expiry. | G5, G6 |
 | D4 | **Built-in loss control.** Liquor variance, grocery shrink, voids/refunds/comps and cash over/short, analysed per staff member, shift and item, with AI alerts. | G5, G9 |
-| D5 | **Offline-first with safe sync.** Every terminal works without internet; conflicts are resolved by clear rules (Section 7). | G4 |
+| D5 | **Offline-first with safe sync.** Every terminal works without internet; conflicts are resolved by clear rules (Section 8). | G4 |
 | D6 | **Local fit.** Pluggable fiscal/e-invoicing connectors, mobile money and QR payments, multi-currency, multi-language, low-bandwidth mode. | G7 |
 | D7 | **Open by design.** Processor-agnostic payments, full API, data export, and customer ownership of data. | G8 |
 | D8 | **Recommendations, not just reports.** Suggested orders, suggested markdowns, variance investigations, promotion post-mortems and natural-language questions. | G9 |
@@ -189,7 +200,7 @@ Many target customers already have a POS, an ERP, or both. The platform therefor
 
 ### 5.4 Integration design principles for Modes 2 and 3
 
-- **Connectors, not custom code:** prebuilt connectors for the most common ERPs and POS systems (Section 10), plus a generic API, webhook and CSV/SFTP route for everything else.
+- **Connectors, not custom code:** prebuilt connectors for the most common ERPs and POS systems (Section 11), plus a generic API, webhook and CSV/SFTP route for everything else.
 - **Mapping layer:** field mapping for items, taxes, tenders, GL accounts, cost centres and locations, maintained in a visual screen, not code.
 - **Posting options:** per transaction (real time), per shift, or daily summary journals, chosen per customer.
 - **Idempotent and auditable:** every sync message has a unique ID, retries safely, and is logged with a success or failure status and an error queue that a human can fix and resend.
@@ -270,7 +281,7 @@ Each process below is described in the same way:
   - Remote manager approval on the phone for overrides, voids and refunds.
   - Customer-facing display with running total and promotions applied.
   - Receipts printed, emailed, sent by SMS/WhatsApp, or as a QR code; fiscal receipt where required.
-  - Full offline operation (Section 7).
+  - Full offline operation (Section 8).
 
 #### S6. Weighed produce and fresh counters
 - **Manual today:** Produce weighed on a separate scale, price written on the bag, cashier types it in.
@@ -591,6 +602,19 @@ Resto-bar mode includes all bar processes (B1–B13) plus the following.
 - **Our features:**
   - Automatic DSR emailed or sent by WhatsApp at close: sales, covers, average spend, labour %, comps, voids, cash over/short and notes.
 
+#### R15. Coffee bar and barista station
+This process also applies to bars that serve coffee and to supermarkets with an in-store café.
+- **Manual today:** Cashier shouts the order or writes it on the cup; barista works from memory; milk and beans ordered when they run out; loyalty stamp cards in wallets.
+- **Existing POS:** Café-focused POS products (Square, Clover, Toast and others) offer nested modifiers (milk, size, temperature, syrups), barista display screens and order-ahead through a shared item library.
+- **Gap:** Coffee stock (beans by gram, milk by litre) is rarely tracked against drinks sold; order-ahead and counter orders often arrive in different queues; stamp cards are easy to abuse.
+- **Our features:**
+  - Barista display screen (or cup-label printer) with one queue for counter, table, QR and order-ahead drinks, sorted by promised time, with the customer's name.
+  - Drink builder: size, shots, milk type, temperature, syrups and extras in two or three taps; allergen flags (for example, nut milks).
+  - Coffee recipes: dose (g), yield (ml) and milk per size, so beans, milk, cups and lids are depleted automatically; milk waste logging.
+  - Order-ahead with pickup times set by barista load; "ready" SMS or screen call-out.
+  - Digital stamp card and loyalty shared with the bar, restaurant or supermarket.
+  - Station checklist: opening calibration, cleaning and closing tasks, with sign-off by the barista.
+
 ### 6.4 Shared back-office and ERP processes
 
 These processes are where ERP systems are strongest and POS systems weakest. The platform either performs them natively (Mode 1) or feeds the customer's ERP (Modes 2 and 3).
@@ -609,9 +633,180 @@ These processes are where ERP systems are strongest and POS systems weakest. The
 
 ---
 
-## 7. Solution architecture and core modules
+## 7. People: management roles, users and usability
 
-### 7.1 Architecture overview
+A POS succeeds or fails on the people who use it every shift. Many existing systems are designed around the transaction, not the person. They offer one generic "employee" profile, a manager PIN, and a back office that only the owner understands. This platform is designed around **the real roles in each business**: what each person is responsible for, what they need to see, what they may and may not do, and the conditions they work in.
+
+### 7.1 Who runs and uses the system in each business
+
+| Level | Supermarket / grocery | Bar / pub / lounge | Resto-bar / café |
+|---|---|---|---|
+| **Owner / directors** | Owner, directors, head office (HQ) | Owner, investors | Owner, partners |
+| **General management** | Store manager, assistant / duty manager | General manager, assistant manager | General manager, restaurant manager |
+| **Department / area management** | Department managers (fresh produce, butchery, bakery, deli, grocery, beverages, non-food); front-end (checkout) supervisor / head cashier; buyer / category manager | Bar manager, head bartender, events / promotions manager | Floor manager / supervisor, bar manager, head chef / executive chef, sous chef, head barista / café lead |
+| **Control and back office** | Inventory controller / stock clerk, receiving clerk, loss-prevention officer, accountant, HQ admin / IT | Cellar person / storekeeper, accountant | Storekeeper, purchasing officer, cost controller, accountant, marketing |
+| **Frontline staff** | Cashiers, self-checkout attendants, shelf stockers / merchandisers, counter staff (deli, butchery, bakery), online-order pickers, security | Bartenders, mixologists, barbacks, baristas, cocktail waiters, door staff / door cashier, VIP host | Host / hostess, waiters / servers, runners, bartenders, baristas, barbacks, cashiers, line cooks / chefs de partie, expeditor, kitchen porters, delivery / takeaway coordinator |
+| **Outside users** | Customers (self-checkout, scan-and-go, online orders), suppliers (portal), auditors | Guests (QR tabs, ticketing) | Guests (QR ordering, reservations, order-ahead), delivery riders |
+
+Each person has **one login across all modes and locations**, with a role per location. For example, one person can be a bartender in the lounge and a supervisor in the café. The platform ships with **role templates** for every role above; owners can copy and adjust them.
+
+### 7.2 Role-by-role design: supermarket
+
+| Role | Main responsibilities | What they do in the system | Device | Home screen on login |
+|---|---|---|---|---|
+| **Owner / HQ** | Profit, growth, control across stores | Approve large POs, price strategy and budgets; review multi-store performance; set policies and permissions | Mobile app, web | Sales vs budget by store, margin, shrink, cash position, alerts |
+| **Store manager** | Whole-store results, staff, compliance | Approve voids/refunds/overrides remotely; approve stock adjustments and POs within limit; review daily report; manage rota; handle escalations | Mobile app, back-office tablet or PC | Today's sales vs target, queue length by lane, staff on shift, pending approvals, alerts |
+| **Duty / assistant manager** | Runs the shift | Open/close store; float and safe; approvals on the floor; incident log | Mobile app, handheld | Shift checklist, approvals, lane status |
+| **Front-end supervisor / head cashier** | Checkouts, cashiers and cash | Assign cashiers to lanes; issue floats; cash drops; blind-close review; open more lanes when queues build; self-checkout interventions | Handheld, supervisor terminal | Lane map (open/closed, queue, cashier), cash in drawers, exceptions |
+| **Cashier** | Fast, accurate checkout | Scan, weigh, take payment, apply coupons, loyalty lookup, suspend/recall, age checks | Lane terminal + scanner-scale | Checkout screen only; personal speed and accuracy shown at shift end |
+| **Self-checkout attendant** | Help customers, prevent loss | Clear weight/age/security alerts; approve restricted items; assist with produce | Handheld or attendant tablet | All self-checkout lanes with alert status |
+| **Department manager** (fresh, butchery, bakery, deli, grocery) | Department sales, margin, waste, availability | Review and adjust suggested orders; production plans; markdowns; waste; cycle counts; planogram tasks | Handheld, tablet | Department sales, margin, waste, expiring items, out-of-stocks, tasks |
+| **Counter staff** (deli, butchery, bakery) | Serve and label fresh goods | Weigh and label; record production batches and waste | Label scale, tablet | Production plan, today's orders |
+| **Buyer / category manager** | Range, suppliers, cost price and promotions | New items; supplier terms; promotions; approve cost changes; review promotion results | Web back office | Category performance, supplier fill rates, cost changes waiting, promotion calendar |
+| **Receiving clerk** | Accurate deliveries | Receive against PO on handheld; record shorts/damages with photos; capture expiry | Rugged handheld | Deliveries expected today, open POs |
+| **Inventory controller / stock clerk** | Accurate stock | Cycle counts; transfers; adjustments (for approval); variance investigation | Handheld, PC | Count schedule, variances to review |
+| **Shelf stocker / merchandiser** | Full, correct shelves | Gap scans (empty shelf → replenish task); price-label checks; expiry checks | Handheld | Task list by aisle |
+| **Online-order picker** | Pick online orders | Picking route; substitutions; weighed-item adjustments | Handheld | Orders to pick, by slot |
+| **Loss-prevention officer** | Reduce theft and fraud | Review exception reports and AI alerts; link to CCTV; high-risk item watchlist | Web | Exception dashboard by cashier and lane |
+| **Accountant** | Books, tax and reconciliation | Review postings to ERP; settlement reconciliation; tax reports | Web | Posting status, unreconciled items, period close checklist |
+
+### 7.3 Role-by-role design: bar
+
+| Role | Main responsibilities | What they do in the system | Device | Home screen on login |
+|---|---|---|---|---|
+| **Owner** | Profit and control | Review sales, pour cost, variance, labour, cash; approve large purchases; set permissions | Mobile app | Tonight's sales live, pour cost, variance trend, comps, cash, alerts |
+| **General manager** | Whole venue, staff, licence | Approvals; rota; events; incident log; weekly variance review; closing sign-off | Mobile app, tablet | Live sales by station, staff on shift, open tabs, approvals, capacity |
+| **Bar manager** | Drinks menu, stock, bar team | Recipes and pour standards; par levels; distributor orders; stock counts and variance investigation; comp budgets; happy-hour rules | Tablet, bottle scale, web | Variance by product and station, stock to order, recipe margins |
+| **Head bartender / shift lead** | Runs the bar during the shift | Assign stations; approve voids/comps within limit; manage tabs over limit; bartender cash-outs | Bar terminal with elevated PIN, handheld | Station view, open tabs, tab alerts, voids and comps this shift |
+| **Bartender / mixologist** | Fast, accurate drinks and payments | Speed screen, tabs, repeat rounds, payments, tips; comp and spill logging with reason; view recipe cards | Bar terminal, BDS, NFC wristband or card to log in | Speed screen; own open tabs; own sales and tips |
+| **Barback** | Keep the bar stocked | Restock from par list; record store-room transfers; log empty kegs and bottles; report breakages | Handheld | Restock list, keg status |
+| **Barista** (in bars with coffee service) | Coffee drinks | Barista queue, recipes, milk waste (see R15) | Barista display | Drink queue |
+| **Cocktail waiter / server** | Table service in the bar | Orders and tabs by table on a handheld; pay at table | Handheld / SoftPOS | Own tables and tabs |
+| **Door staff / door cashier** | Entry, cover charge, capacity, ID | Sell covers and tickets; scan guest lists; ID checks; capacity count; incident log | Handheld, ID scanner | Capacity gauge, guest list, cover sales |
+| **VIP host** | Tables and bottle service | Bookings, deposits, minimum spend tracking | Handheld | VIP tables with spend vs minimum |
+| **Cellar person / storekeeper** | Store room | Receive distributor deliveries; issue stock to bars; keg and crate returns | Handheld | Requisitions to fill, deliveries due |
+| **Events / promotions manager** | Events and promoters | Event pricing, guest lists, promoter commissions and results | Web, mobile | Event performance, promoter reports |
+| **Accountant** | Books | Postings, cash and settlement reconciliation, tip and tax reports | Web | Posting status, reconciliation |
+
+### 7.4 Role-by-role design: resto-bar and café
+
+All bar roles in 7.3 also apply to the bar in a resto-bar.
+
+| Role | Main responsibilities | What they do in the system | Device | Home screen on login |
+|---|---|---|---|---|
+| **General / restaurant manager** | Guest experience, sales, labour, cost | Approvals; rota vs forecast; daily sales report; food and beverage cost review; complaints | Mobile app, tablet | Covers, sales vs forecast, labour %, ticket times, approvals, guest feedback |
+| **Floor manager / supervisor / captain** | Runs the floor during service | Table assignments and sections; comps and voids within limit; bill problems; pace of service | Handheld | Live floor plan with table timers and alerts |
+| **Host / hostess** | Reservations, waitlist, seating | Bookings, waitlist messages, seating, table combining | Host tablet | Floor plan + reservations timeline + waitlist |
+| **Waiter / server** | Take orders and serve | Order by seat and course on handheld; fire courses; split bills; pay at table; tips | Handheld / SoftPOS | Own tables with status and timers |
+| **Runner** | Deliver food and drinks | See ready items and table numbers | Expo screen, handheld | Items ready to run |
+| **Head chef / executive chef** | Menu, kitchen team, food cost | Recipes and costing; menu engineering; prep plans; supplier orders; waste review; kitchen rota | Tablet, web | Food cost %, top waste items, prep plan, ticket times by station |
+| **Sous chef / kitchen lead** | Runs the kitchen during service | Fire and pace orders; mark items sold out ("86"); approve re-fires | KDS (expo) | Expo view, all-day counts |
+| **Line cook / chef de partie** | Cook their station's items | Bump tickets on station KDS; record waste | Station KDS with bump bar | Station tickets only |
+| **Expeditor** | Complete, correct plates and trays | Bring food and drinks for one table together; call runners | Expo KDS | Expo view by table |
+| **Kitchen porter / steward** | Cleaning, dishes, receiving support | Checklists; waste logging | Wall tablet | Checklists |
+| **Head barista / café lead** | Coffee quality and the café team | Coffee recipes, milk and bean orders, calibration and cleaning logs, café rota | Tablet | Drinks per hour, queue time, milk waste, stock to order |
+| **Barista** | Coffee and café drinks | Barista queue; drink builder; mark ready; milk waste; station checklist | Barista display, counter terminal | Drink queue by promised time |
+| **Cashier / counter staff** | Counter orders and payments | Order, payment, loyalty, takeaway | Counter terminal | Order screen |
+| **Storekeeper / purchasing officer** | Stock and suppliers | Receiving, issues to kitchen and bar, POs, supplier invoices | Handheld, web | Deliveries due, stock below par |
+| **Cost controller** | Food and beverage cost | Theoretical vs actual cost; variance; recipe cost updates; month-end stock valuation | Web | Cost dashboards, variances |
+| **Delivery / takeaway coordinator** | Aggregator and takeaway orders | Accept and pace orders; rider handover; availability per platform | Tablet | Incoming orders by platform, prep times |
+| **Marketing** | Guests and loyalty | Campaigns, loyalty rules, feedback follow-up | Web | Guest counts, loyalty, reviews |
+
+### 7.5 Permissions and approval matrix
+
+Permissions are granted by role, can be adjusted per person and location, and are logged. The approach reflects practice in current systems, such as the configurable role permissions in Lightspeed Restaurant, TouchBistro and LS Central. Two improvements over typical POS behaviour:
+
+1. **Thresholds, not just on/off.** A bartender may comp up to a set value per shift, and a supervisor up to a higher value.
+2. **Remote approval.** The request goes to the manager's phone with the details (item, amount, staff member, reason), so no one has to key a manager PIN into a staff terminal. Manager PINs typed on shared screens are a common source of fraud.
+
+The table below shows default templates for a typical venue. ✔ = allowed; ◐ = allowed up to a threshold; ✖ = needs approval from a higher level.
+
+| Action | Frontline (cashier, bartender, server, barista) | Supervisor / head bartender / head cashier | Manager (store, bar, restaurant, GM) | Owner / HQ |
+|---|:---:|:---:|:---:|:---:|
+| Void an item before it is sent to kitchen/bar or paid | ✔ | ✔ | ✔ | ✔ |
+| Void after sending / after payment | ✖ | ◐ | ✔ | ✔ |
+| Discount | ◐ preset discounts only | ◐ up to set % | ✔ | ✔ |
+| Price override | ✖ | ◐ | ✔ | ✔ |
+| Refund | ✖ | ◐ with receipt, up to set amount | ✔ | ✔ |
+| Comp / spill / staff drink | ◐ spills logged; comps within budget | ◐ within budget | ✔ | ✔ |
+| Open cash drawer without a sale | ✖ | ✔ (reason required) | ✔ | ✔ |
+| Tab over limit, transfer another person's tab | ✖ | ✔ | ✔ | ✔ |
+| Close shift / blind close | ✔ own drawer | ✔ review | ✔ approve variances | ✔ |
+| Stock adjustment | ✖ (can count) | ◐ | ◐ up to set value | ✔ |
+| Receive goods | ✔ (receiving role) | ✔ | ✔ | ✔ |
+| Create PO | ✖ | ◐ suggested orders only | ◐ up to set value | ✔ |
+| Change prices, recipes, promotions | ✖ | ✖ | ◐ local items | ✔ central |
+| Edit time clock entries | ✖ | ◐ same day | ✔ | ✔ |
+| View sales reports | Own sales and tips | Shift | Location | All |
+| View costs and margins | ✖ | ✖ | ✔ | ✔ |
+| Manage users and permissions | ✖ | ✖ | ◐ local staff | ✔ |
+
+Controls that apply to everyone:
+- Segregation of duties: the person who receives goods cannot approve the supplier invoice; the person who counts cash cannot approve their own variance.
+- Every sensitive action records who did it, who approved it, when, on which device, and why.
+- Owners get a weekly "exceptions by person" summary.
+
+### 7.6 Management routines built into the system
+
+Managers work in routines. The platform turns each routine into a guided checklist with the data they need already on screen, instead of leaving them to find reports.
+
+| When | Supermarket (store / department manager) | Bar (bar manager / GM) | Resto-bar / café (GM, head chef, café lead) |
+|---|---|---|---|
+| **Before opening** | Opening checklist; floats issued; lanes assigned from forecast; expiring-items task list; deliveries due | Par restock list; floats; station assignment; happy-hour and event prices confirmed | Reservations and forecast covers; prep list; 86 list; staff briefing notes; café calibration check |
+| **During the shift** | Queue alerts (open another lane); remote approvals; out-of-stock alerts; self-checkout alerts | Live sales by station; tab alerts; capacity; comp and void alerts; remote approvals | Ticket-time alerts; table timers; sold-out sync; labour vs sales alert (send staff home or call in) |
+| **Closing** | Blind closes and cash-up; safe; waste and markdown recording; daily sales report | Close or transfer all tabs; bartender cash-outs; high-value stock count; incident log | Server cash-outs and tips; waste log; daily sales report; closing checklists |
+| **Weekly** | Suggested orders review; cycle counts; promotion results; rota | Full liquor count and variance review; distributor orders; rota | Food cost and variance; menu-engineering review; supplier orders; rota |
+| **Monthly** | Stock valuation; shrink review; supplier scorecards; P&L | Pour cost and margin; comp budgets; P&L | Food and beverage cost; menu changes; P&L; guest feedback trends |
+
+Other management features:
+- **Shift handover notes:** structured notes passed from one manager to the next (for example, "keg 3 running low", "customer complaint pending").
+- **Task assignment:** managers assign tasks (count this shelf, clean the coffee machine, reset planogram) with due times and photo proof.
+- **Staff communication:** announcements and pre-shift briefing (specials, sold-out items, events) shown on staff screens and in the staff app.
+- **Performance coaching:** per-person reports (speed, accuracy, upselling, voids) are shown to the person and their manager to support fair coaching, not just discipline.
+
+### 7.7 Usability by working environment
+
+Each workplace has different physical conditions, so screens and devices are designed for where they are used.
+
+| Environment | Conditions | Design response |
+|---|---|---|
+| **Supermarket checkout lane** | Standing for hours; high item volume; repetitive motion; bright lighting and glare | Scanner and keyboard first; minimal screen touches per item; large totals; anti-glare screens; ergonomic layout (scanner-scale placement, screen height); items-per-minute feedback |
+| **Self-checkout** | Untrained customers; stress; many languages; accessibility needs | Step-by-step guidance with pictures; language choice; audio and visual cues; wheelchair-reachable height; big buttons; fast help call to attendant |
+| **Shop floor, receiving dock, store room** | Walking; cold rooms; cartons; poor Wi-Fi in back areas | Rugged handhelds with built-in scanners; one-handed use; glove-friendly buttons; offline tasks that sync later |
+| **Bar counter** | Dark; loud; wet; very busy; many staff on one terminal | Dark theme with high contrast; large buttons; no reliance on sound; spill-proof screens; login by NFC tap in under a second; speed screen; most actions in one or two taps |
+| **Coffee station** | Steam, heat and noise; both hands busy; fast queue | Barista display readable from a distance; bump by large button or foot pedal; cup-label printer as an alternative to the screen; names on orders |
+| **Restaurant floor** | Moving between tables; sunlight on terraces; guests watching | Handheld with sunlight-readable screen; one-handed ordering; seat and course numbering; fast payment at the table; discreet design |
+| **Kitchen** | Heat, grease and steam; gloves; noise; no time to touch screens | KDS mounted at eye level, readable from 2 m; colour-coded timers; bump bars instead of touch; allergy alerts in a distinct colour and icon |
+| **Door / outside** | Night; rain; queues | Bright, weather-resistant handheld; large capacity counter; fast ID scan |
+| **Back office / head office** | Desk; long sessions; bulk data | Full web app with keyboard shortcuts, bulk editing, imports/exports and saved report views |
+| **Owner on the move** | Phone; short attention; low bandwidth | Mobile app with a one-screen summary, push alerts, one-tap approvals, and data-light mode |
+
+### 7.8 Usability principles and accessibility
+
+1. **Role-based home screens:** everyone sees only what their job needs. A cashier never sees cost prices; a line cook sees only their station.
+2. **Speed targets for common tasks:** add an item in 1 tap or scan; open a tab in 1 card tap; repeat a round in 1 tap; take payment in 2 taps; find any item in 3 keystrokes. These are measured in usability tests.
+3. **Consistent layout** across modes, so staff who move between bar, café and shop don't have to relearn.
+4. **Pictures and icons with words,** for staff with lower literacy or who work in a second language; product photos on buttons.
+5. **Language per user,** so two bartenders on the same terminal can each see their own language. Receipts can use the customer's language where needed.
+6. **Error prevention over error messages:** unavailable items are greyed out; large or unusual quantities are flagged ("24 bottles of vodka?"); confirmation only for actions that are hard to undo.
+7. **Visible system status:** clear offline, sync and printer status indicators, and what to do next when something fails.
+8. **Customisable, but controlled:** managers can rearrange buttons and speed screens for their venue; HQ can lock layouts where consistency matters.
+9. **Accessibility:** customer-facing screens (self-checkout, kiosks, QR menus) target WCAG 2.2 AA. This means adjustable text size, colour-blind-safe status colours, screen-reader support on web and mobile, and reachable heights for kiosks. Staff screens support left- or right-handed layouts.
+10. **Training mode on every device:** practice transactions that don't affect sales or stock, plus in-app tips on first use of each feature.
+
+### 7.9 Staff experience and adoption
+
+- **Staff app:** schedule, shift swaps, availability, clock-in reminders, tips and earnings, announcements, and training modules.
+- **Onboarding:** a new cashier, bartender, server or barista should be productive within one hour. Built-in guided lessons are tracked in the staff profile.
+- **Recognition:** optional sales contests and upselling goals, used carefully and transparently.
+- **Fairness and privacy:** staff can see the performance data held about them. Monitoring (such as CCTV overlays and exception reports) follows local labour and privacy law.
+- **Measuring usability:** during the pilot, measure task times, error rates, training time and a standard usability questionnaire such as the System Usability Scale (SUS) for each role. The target is a SUS score of 75 or more, which is generally considered good. Test with real staff in real conditions (for example, a Friday-night bar shift) before rollout.
+
+---
+
+## 8. Solution architecture and core modules
+
+### 8.1 Architecture overview
 
 ```
       ┌──────────────── EXISTING SYSTEMS (Modes 2 & 3) ─────────────────┐
@@ -643,7 +838,7 @@ These processes are where ERP systems are strongest and POS systems weakest. The
             Payment terminals (P2PE) ──► Payment processor / acquirer
 ```
 
-### 7.2 Design principles
+### 8.2 Design principles
 
 - **Cloud-native, offline-first.** Every terminal holds a local copy of the catalogue, prices, promotions and open tabs. Sales continue without internet, and offline card payments are stored and forwarded within configurable risk limits.
 - **Offline conflict rules.** Sales recorded offline are never discarded. Price or promotion changes made centrally apply from the time they reach the terminal. Stock is corrected by adjustment movements, never overwritten. Tabs are locked to one terminal at a time, or merged with an audit record.
@@ -652,7 +847,7 @@ These processes are where ERP systems are strongest and POS systems weakest. The
 - **API-first.** Documented REST/webhook APIs; the integration hub (Section 5.4) is part of the product, not a project add-on.
 - **Secure by design.** Card data never touches the POS application (P2PE / tokenisation), role-based access control, full audit trail, encryption in transit and at rest.
 
-### 7.3 Core modules (shared by all modes)
+### 8.3 Core modules (shared by all modes)
 
 | Module | Key capabilities |
 |---|---|
@@ -668,7 +863,7 @@ These processes are where ERP systems are strongest and POS systems weakest. The
 | **Integration hub** | Connectors, mapping, sync monitoring, error queue and resend |
 | **Admin** | Multi-entity, locations, devices, users, audit log, backups |
 
-### 7.4 AI and advanced features (phase 2+)
+### 8.4 AI and advanced features (phase 2+)
 
 | Feature | Value | Status in today's market |
 |---|---|---|
@@ -683,7 +878,7 @@ These processes are where ERP systems are strongest and POS systems weakest. The
 
 ---
 
-## 8. Hardware concept
+## 9. Hardware concept
 
 | Device | Supermarket | Bar | Resto-bar |
 |---|:---:|:---:|:---:|
@@ -695,6 +890,9 @@ These processes are where ERP systems are strongest and POS systems weakest. The
 | Payment terminal (EMV, NFC, P2PE-validated) | ✔ | ✔ | ✔ |
 | Handheld POS / SoftPOS phone | receiving, counts, queue-busting | ✔ floor service, door | ✔ table service |
 | Kitchen/bar printers or KDS/BDS screens | deli/bakery | ✔ BDS | ✔ KDS + BDS |
+| Barista display or cup-label printer | in-store café | optional | ✔ café |
+| Manager smartphone (approvals, alerts) | ✔ | ✔ | ✔ |
+| NFC staff cards / wristbands for fast login | optional | ✔ | ✔ |
 | Self-checkout / kiosk | ✔ | – | optional |
 | Electronic shelf labels | ✔ | – | – |
 | ID scanner | alcohol/tobacco | ✔ | ✔ |
@@ -706,7 +904,7 @@ These processes are where ERP systems are strongest and POS systems weakest. The
 
 ---
 
-## 9. Payments, security and compliance
+## 10. Payments, security and compliance
 
 **Payments**
 
@@ -735,7 +933,7 @@ These processes are where ERP systems are strongest and POS systems weakest. The
 
 ---
 
-## 10. Integrations and ERP connectors
+## 11. Integrations and ERP connectors
 
 | Category | Planned connectors (priority to be set in discovery) |
 |---|---|
@@ -753,11 +951,15 @@ These processes are where ERP systems are strongest and POS systems weakest. The
 
 ---
 
-## 11. Key reports and KPIs
+## 12. Key reports and KPIs
 
 **Supermarket:** sales per hour and per lane; average basket value and size; items per minute per cashier; gross margin by category; shrink % (known and unknown); waste and markdown value; stock turn; out-of-stock rate; supplier fill rate; promotion uplift and margin; self-checkout usage and intervention rate.
 
 **Bar:** pour cost % (overall and by category); liquor variance % and value by product, station and bartender; sales per bartender per hour; average check; walk-out losses; comp/spill value; happy-hour lift; keg yield; top sellers and dead stock.
+
+**Café / barista station:** drinks per hour; average wait from order to "ready"; order-ahead share; milk and bean usage versus theoretical; loyalty redemption.
+
+**People and management:** sales and items per labour hour by role; approval response time; exceptions by person; training completion; staff turnover; usability (SUS) score by role.
 
 **Resto-bar:** covers, table turn time, average spend per cover; ticket times by station; food cost % and beverage cost %; prime cost (COGS + labour); sales by channel (dine-in, takeaway, delivery, QR); delivery commission; menu-engineering matrix; labour % of sales; guest feedback score.
 
@@ -765,7 +967,7 @@ These processes are where ERP systems are strongest and POS systems weakest. The
 
 ---
 
-## 12. Implementation approach
+## 13. Implementation approach
 
 | Phase | Duration (indicative) | Key activities | Output |
 |---|---|---|---|
@@ -779,13 +981,14 @@ For customers starting in **Mode 3**, Phase 1 is shorter (connectors and dashboa
 
 **Change management and training**
 
-- Role-based training: cashier, bartender, server, supervisor, receiver/buyer, manager, accountant, owner.
+- Role-based training using the role templates in Section 7: cashier, self-checkout attendant, department manager, receiving clerk, buyer, bartender, barback, barista, server, host, chef and line cook, storekeeper, supervisor, manager, accountant and owner.
+- Managers trained on approvals, daily routines (Section 7.6) and reading exception reports.
 - Short in-app guides and videos; a sandbox "training mode" on every terminal.
 - Super-users at each site; two weeks of intensive support after go-live.
 
 ---
 
-## 13. Commercial model (options)
+## 14. Commercial model (options)
 
 | Model | Description | Suited to |
 |---|---|---|
@@ -800,7 +1003,7 @@ For customers starting in **Mode 3**, Phase 1 is shorter (connectors and dashboa
 
 ---
 
-## 14. Indicative cost components (for budgeting)
+## 15. Indicative cost components (for budgeting)
 
 | Item | Notes |
 |---|---|
@@ -818,7 +1021,7 @@ For customers starting in **Mode 3**, Phase 1 is shorter (connectors and dashboa
 
 ---
 
-## 15. Risks and mitigation
+## 16. Risks and mitigation
 
 | Risk | Impact | Mitigation |
 |---|---|---|
@@ -826,7 +1029,10 @@ For customers starting in **Mode 3**, Phase 1 is shorter (connectors and dashboa
 | Poor data quality (SKUs, recipes) | Wrong stock and variance figures | Data cleansing in discovery; GTIN standards; recipe audit with the bar manager and chef |
 | Integration failures with the customer's ERP/POS | Missing or duplicate postings | Idempotent messages, sync monitoring, error queue, reconciliation reports, pilot validation of postings |
 | Existing POS vendor limits API access (Mode 3) | Incomplete data | Use official APIs/exports first; negotiate access; fall back to Mode 2 for affected sites |
-| Staff resistance | Slow adoption, workarounds | Simple UI, training mode, super-users, involving staff in the pilot |
+| Staff resistance | Slow adoption, workarounds | Role-based screens, training mode, super-users, involving staff of every role in the pilot |
+| Poor usability in real conditions (dark bar, hot kitchen, peak rush) | Errors, slow service, staff bypass the system | Design per environment (Section 7.7); usability tests on live shifts; SUS measured by role |
+| Permissions too loose or too strict | Fraud, or managers overloaded with approvals | Threshold-based permissions, remote approvals, and monthly review of approval volumes and exceptions |
+| Staff privacy concerns about monitoring | Distrust, legal risk | Transparency to staff about their data; follow local labour and privacy law |
 | Scope creep (trying to match every ERP feature) | Delays and cost | Process-based scope from Section 6; ERP remains the system of record where it is strong (Mode 2) |
 | Payment security breach | Financial and reputational loss | P2PE/tokenisation, PCI DSS v4.0 controls, MFA, monitoring |
 | Vendor/processor lock-in | Higher long-term costs | Open APIs, data export, processor-agnostic design |
@@ -836,7 +1042,7 @@ For customers starting in **Mode 3**, Phase 1 is shorter (connectors and dashboa
 
 ---
 
-## 16. Success measures (pilot evaluation)
+## 17. Success measures (pilot evaluation)
 
 | Area | Measure | Baseline → Target |
 |---|---|---|
@@ -847,19 +1053,21 @@ For customers starting in **Mode 3**, Phase 1 is shorter (connectors and dashboa
 | Integration | ERP postings completed without manual correction | → ≥ 99% |
 | Admin time | Hours per week on manual entry, reconciliation and reports | Measure → −50% |
 | Uptime | Sales lost to downtime | → 0 |
-| Satisfaction | Staff ease-of-use score; customer satisfaction/NPS | → ≥ 8/10 |
+| Usability | System Usability Scale (SUS) by role; time to productivity for new staff; task error rate | → SUS ≥ 75; ≤ 1 hour to productivity |
+| Management | Approval response time; managers' admin hours per week | Measure → approvals < 2 min; admin time −50% |
+| Satisfaction | Customer satisfaction/NPS | → ≥ 8/10 |
 | Financial | Gross margin; labour %; processing cost % | Improvement vs baseline |
 
 ---
 
-## 17. Conclusion and next steps
+## 18. Conclusion and next steps
 
 The platform combines what cloud POS products do best (speed, simplicity, payments, mobility) with what ERP systems do best (controls, purchasing, accounting, audit). It adds deep supermarket, bar and resto-bar workflows designed from how each process is actually run today. Its three deployment modes let a business adopt it at its own pace: as an intelligence layer over current systems, as a POS front end to an existing ERP, or as a complete platform.
 
 **Proposed next steps**
 
 1. Confirm the target businesses: number of sites, lanes and terminals, country or countries of operation, and **the POS and ERP systems they use today**.
-2. Validate Section 6 with operators: walk through each process with a store manager, bar manager and chef, and rank features as *must*, *should* or *later*.
+2. Validate Sections 6 and 7 with operators: walk through each process and each role with a store manager, department manager, head cashier, bar manager, bartender, barista, floor manager and chef, and rank features as *must*, *should* or *later*.
 3. Decide the delivery route: build a custom platform, build on an open-source base (for example, Odoo or ERPNext), or extend an existing product. A short build-versus-buy analysis is recommended.
 4. Choose the first deployment mode for the pilot and the priority connectors.
 5. Shortlist hardware and payment partners; approve pilot budget and timeline.
@@ -893,6 +1101,7 @@ The platform combines what cloud POS products do best (speed, simplicity, paymen
 | Happy-hour / time-based pricing | ○ | ○ | ● | ● |
 | Door, cover charge, capacity, minimum spend | | | ● | ○ |
 | Floor plan & table management | | | ○ | ● |
+| Barista display, drink builder, coffee recipes | | ○ (in-store café) | ○ | ● |
 | KDS, coursing, expo | | ○ (deli) | | ● |
 | Allergen management | | ○ | | ● |
 | QR table ordering & pay-at-table | | | ○ | ● |
@@ -901,18 +1110,25 @@ The platform combines what cloud POS products do best (speed, simplicity, paymen
 | Recipe costing & menu engineering | | ○ | ● | ● |
 | AI forecasting, anomaly detection | ○ | ● | ● | ● |
 | Intelligence layer over existing POS (Mode 3) | ○ | ○ | ○ | ○ |
+| Role templates, threshold permissions, remote approvals | ● | ● | ● | ● |
+| Management routines, checklists, handover notes, tasks | ● | ● | ● | ● |
+| Staff app (rota, swaps, tips, training) | ● | ● | ● | ● |
+| Environment-specific UI (dark bar, KDS bump bars, lane ergonomics) | ● | ● | ● | ● |
 
 ● = included / core to the mode  ○ = optional add-on
 
 ## Appendix B: Glossary
 
 - **BDS / KDS:** Bar / Kitchen Display System; screens that replace paper order tickets.
+- **Barback:** Bar assistant who restocks, changes kegs and clears glasses.
+- **Barista:** Staff member who prepares espresso-based and other coffee drinks.
 - **BoM:** Bill of materials; the list of ingredients or components in a product (a recipe, in hospitality).
 - **DSD:** Direct store delivery; suppliers who deliver straight to the store rather than via a warehouse.
 - **DSR:** Daily sales report.
 - **E2EE / P2PE:** End-to-end / point-to-point encryption; card data is encrypted inside the payment terminal.
 - **EMV:** The global chip-card payment standard.
 - **ESL:** Electronic shelf label; a digital price tag updated from the POS.
+- **Expeditor (expo):** Person, or screen, that coordinates finished food and drinks so a table's order leaves together.
 - **FEFO / FIFO:** First-expired-first-out / first-in-first-out stock rotation.
 - **GRN:** Goods received note.
 - **GTIN:** Global Trade Item Number; the number behind a product barcode.
@@ -920,7 +1136,10 @@ The platform combines what cloud POS products do best (speed, simplicity, paymen
 - **PMS:** Hotel property management system.
 - **Pour cost:** Cost of the liquor in a drink ÷ its selling price.
 - **Pre-authorisation:** A temporary hold on a card when a tab is opened.
+- **Remote approval:** A manager approves a staff request (void, refund, discount) on their phone instead of entering a PIN at the terminal.
+- **Role template:** A predefined set of screens and permissions for a job role, adjustable per person.
 - **SoftPOS:** Software that accepts contactless cards on an ordinary NFC phone or tablet.
+- **SUS (System Usability Scale):** A standard 10-question usability survey scored 0–100.
 - **System of record:** The system whose data is treated as the official version of a given object.
 - **Three-way match:** Checking a supplier invoice against the purchase order and goods received note before paying.
 - **UoM:** Unit of measure.
@@ -937,6 +1156,7 @@ Industry articles, vendor pages and documentation consulted in September 2026. F
 - Enterprise hospitality: [Oracle MICROS Simphony](https://www.oracle.com/food-beverage/micros/) · [Restaurant Inventory Management Software: Oracle MICROS Simphony Review 2026](https://restaurantinventorymanagementsoftware.com/solutions/oracle-micros) · [POSUSA: Oracle Simphony Review](https://www.posusa.com/oracle-micros-simphony-pos/)
 - Bar POS: [The Restaurant HQ: Best Bar POS 2026](https://www.therestauranthq.com/technology/best-bar-pos-system/) · [tech.co: Best Bar POS](https://tech.co/pos-system/best-bar-pos) · [Lavu: Best POS for Bars](https://lavu.com/best-pos-for-bar/) · [POSUSA: Best POS for Bars](https://www.posusa.com/best-pos-systems-for-bars/)
 - Liquor inventory and variance: [BinWise: Bar Inventory Guide](https://home.binwise.com/guides/bar-inventory-management) · [BinWise: 5 Causes of Variance](https://home.binwise.com/blog/5-causes-of-variance) · [BinWise: Bevager vs BevSpot vs BinWise](https://home.binwise.com/blog/bevager-vs-bevspot-vs-binwise)
+- Roles, permissions and café POS: [Lightspeed Restaurant: Managing user permissions](https://o-series-support.lightspeedhq.com/hc/en-us/articles/31329418175003-Managing-user-permissions) · [Lightspeed Restaurant: User roles](https://o-series-support.lightspeedhq.com/hc/en-us/articles/35765184351387-Managing-staff-access-with-user-roles) · [TouchBistro: Deciding on staff permissions](https://www.touchbistro.com/blog/how-to-decide-on-staff-permissions-settings-in-your-pos/) · [LS Central: Staff permissions and hospitality POS commands](https://help.lsretail.com/lscentral250/Content/LS-Hospitality/Dining-Table-Management/Staff-Permissions-And-Hospitality.htm) · [SumUp: Managing team POS access](https://www.sumup.com/en-gb/running-business/management/managing-teams-pos-access-effectively/) · [KORONA: Best coffee shop POS 2026](https://koronapos.com/blog/best-pos-system-for-coffee-shop/) · [Expert Market: Best POS for cafés](https://www.expertmarket.com/pos/best-pos-systems-for-cafes)
 - Restaurant / resto-bar POS: [EHL Insights: Restaurant Technology 2026](https://insights.ehl.edu/restaurant-technology) · [Expert Market: Best Restaurant POS 2026](https://www.expertmarket.com/pos/best-pos-restaurants) · [RestroScout: Toast vs Square vs Lightspeed](https://restroscout.com/best-restaurant-pos-systems) · [Guideflow: Kitchen Display Systems 2026](https://www.guideflow.com/blog/kitchen-display-system) · [LithosPOS: POS Trends 2026](https://lithospos.com/blog/pos-system-trends-2026-ai-voice-ordering-cloud-technology-reshaping-retail-and-restaurants/)
 - Pricing: [Toast Pricing](https://pos.toasttab.com/pricing) · [Restaurant Velocity: Toast vs Square vs Lightspeed vs Clover vs TouchBistro vs Revel](https://restaurantvelocity.com/blog/best-restaurant-pos-systems/) · [Beancount.io: Toast vs Square vs Clover 2026](https://beancount.io/blog/2026/07/10/toast-square-clover-pos-system-guide) · [ECOSIRE: Odoo POS vs Square/Toast/Clover/Lightspeed 2026](https://ecosire.com/blog/odoo-pos-vs-square-toast-clover-lightspeed-2026)
 - Market data: [IHL Group: USA POS Terminal Market 2026](https://www.ihlservices.com/news/analyst-corner/2026/03/usa-pos-terminal-market-2026/) · [Straits Research: Cloud POS Market](https://straitsresearch.com/press-release/global-cloud-pos-market-trends) · [LocalExpress: Grocery POS Statistics 2026](https://www.localexpress.io/post/grocery-pos-system-integration-statistics) · [Business Research Insights: Grocery POS Market](https://www.businessresearchinsights.com/market-reports/grocery-pos-systems-market-116654)
