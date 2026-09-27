@@ -4,7 +4,7 @@ This guide contains the prompts to give **Claude Opus 5.5** (in Claude Code or a
 
 > **Updated for concept note v0.6.** The first market is **Rwanda** (concept note Section 25): the Project facts in `CLAUDE.md` are prefilled for Rwanda, and a new **RW** milestone delivers RRA electronic invoicing (EBM through the VSDC), Rwandan tax, mobile money, payroll rules and data residency. Finance, Inventory and Sales are the three core pillars of the system, built in that order through the core prompts **C1 (Finance), C2 (Inventory) and C3 (Sales)**. They sit on a **document engine (C0)** that manages every business document: requisitions, RFQs, quotations, proformas, purchase and sales orders, delivery notes, GRNs, invoices, credit and debit notes, payment vouchers, receipts and statements (concept note Section 24). If you already started building from the earlier version, go to **Part H** for the upgrade path.
 
-It has eight parts:
+It has nine parts:
 
 | Part | What it is | When you use it |
 |---|---|---|
@@ -16,6 +16,7 @@ It has eight parts:
 | **F** | Quality gates and invariants | At the end of every milestone |
 | **G** | Tips for working with Opus 5.5 | Keep at hand |
 | **H** | Upgrade path for a build already in progress | Now, if you started with the earlier version |
+| **I** | Updating and upgrading existing features (change-request form, prompts U1–U8) | Whenever you change something that already exists |
 
 ---
 
@@ -33,8 +34,9 @@ It has eight parts:
 
 - **One milestone per session.** Start each session with the milestone prompt from Part D. When the milestone is done, open a pull request, review it, merge, then start a fresh session for the next milestone.
 - **Plan first, then build.** Every milestone prompt asks Claude to post a short plan and any blocking questions before writing code. Answer the questions; say "proceed" when the plan looks right.
-- **Keep the memory in the repo.** Claude maintains `docs/PROGRESS.md` (what's done, what's next, known issues) and `docs/adr/` (architecture decision records). If a session ends mid-milestone, start the next one with the **Resume** prompt (E.3).
+- **Keep the memory in the repo.** Claude maintains `docs/PROGRESS.md` (what's done, what's next, known issues), `docs/adr/` (architecture decision records), the feature registry `docs/features/` and `docs/CHANGELOG.md`. If a session ends mid-milestone, start the next one with the **Resume** prompt (E.3).
 - **Verify with fresh eyes.** At the end of each milestone, run the **Verify** prompt (E.1). It has a separate sub-agent with a fresh context check the work against the concept note. That catches more than self-review.
+- **Changing what's already built?** Use Part I: fill in the change-request form, pick the matching prompt (U1–U8), and finish with U8 before merging.
 - **You stay the product owner.** Claude makes routine engineering decisions itself and asks only when the choice changes the product (for example, a tax rule, or which ERP is the system of record).
 
 ### A.3 Order of milestones
@@ -125,7 +127,9 @@ It runs in three deployment modes: standalone (Mode 1); POS front end on an exis
 - `docs/PROGRESS.md`: milestone status, what's done, what's next, known issues. Update it at the end of every work session and whenever a milestone task finishes.
 - `docs/adr/NNNN-title.md`: one architecture decision record per significant decision (context, decision, alternatives, consequences).
 - `docs/domain/`: domain model, glossary, state machines, invariants.
-Read `docs/PROGRESS.md` and the relevant ADRs before starting work.
+- `docs/features/`: the feature registry, with one file per process ID (purpose, spec section and version, status, modules, tables, screens, documents, settings/flags, tests, dependencies) and `INDEX.md`. Keep it up to date whenever a feature is added or changed.
+- `docs/CHANGELOG.md`: every user-visible change, with its version, date and process IDs.
+Read `docs/PROGRESS.md`, the relevant registry entries and ADRs before starting work.
 
 ## Default technology stack (change only through an ADR that explains why)
 - Language: TypeScript everywhere (strict mode). Python allowed only for isolated ML/forecasting services.
@@ -166,6 +170,17 @@ Read `docs/PROGRESS.md` and the relevant ADRs before starting work.
 - Customer-facing screens meet WCAG 2.2 AA. Staff UIs support per-user language and left/right-handed layouts.
 - Avoid decorative styling: no gradients, glassmorphism, drop-shadow cards, pill-shaped everything, emoji icons or marketing-page layouts in operational screens. Operational screens are dense, calm, legible and fast.
 - Every device must show online/offline/sync/printer status and tell the user what to do when something fails.
+
+## Changing existing features
+- Start from the feature registry (`docs/features/`): find every feature, module, table, document, screen, setting and test a change touches before editing.
+- Spec first: behaviour changes are written into `docs/concept-note.md` (or `docs/changes/NNNN.md`), with the version bumped and Appendix C updated, before or together with the code.
+- Never break existing data: migrations are reversible and tested on a copy of realistic data; backfills come with a reconciliation proof.
+- History stays as it was: issued documents, posted journals, closed periods and EBM receipts are never changed by an update; new rules apply from their effective date.
+- Rules, rates, thresholds and statutory values are dated configuration with an effective date, never edited in place.
+- Behaviour changes that affect money, tax, stock or documents ship behind a feature flag (per tenant/location, default off) unless the change request says otherwise, and are piloted before general rollout.
+- Version skew: terminals and handhelds may run the previous app version for a while. The sync protocol and APIs stay backward compatible for at least one release; breaking API changes need a new API version.
+- Every change adds or updates tests for the new behaviour and keeps tests proving that "must not change" items still work.
+- After a change: update the registry entries, `docs/CHANGELOG.md` and `docs/PROGRESS.md`, and note how to roll back.
 
 ## How to work
 - You are working autonomously on reversible engineering work. Make routine judgement calls yourself; ask only when different readings would lead to materially different product behaviour (tax, money, legal, data ownership, scope). Stop before destructive operations (dropping data, force-pushing, deleting branches).
@@ -796,6 +811,8 @@ Reproduce it first with a failing test. Find the root cause (not just the sympto
 ### E.5 Change request
 
 ```text
+(For changes to features that already exist, use Part I instead.)
+
 Change request: [description]. Before changing code, update docs/concept-note.md (or add docs/changes/NNNN.md) with the new requirement and its process ID, update the traceability table in docs/PROGRESS.md, then give me a short impact plan (modules, data migration, risks). Implement after I confirm.
 ```
 
@@ -984,6 +1001,208 @@ This codebase already contains work from earlier milestones; see docs/upgrade/co
 
 ### H.6 After the upgrade
 
+- Run the **feature registry** prompt (I.1) once, so future changes can use Part I.
+
 - Continue with the remaining milestones in the new order (A.3).
 - Run **E.1 Verify** at the end of C0, C1, C2 and C3; then **E.9 Books accuracy drill** and **E.10 Document flow walk-through** after C3.
 - From now on, every milestone's "Done when" implicitly includes: the three-way reconciliation passes on the demo data, and no module bypasses the core contracts.
+
+---
+
+## Part I. Updating and upgrading existing features
+
+Once features are built and in use, most work is changing them: a new tax rate, a better report, a new document rule, an improved screen, or a new version of the concept note. This part makes those changes easy and safe.
+
+**How it works:**
+1. Describe the change in the short **change-request form** (I.2). You don't need to know the code.
+2. Pick the **prompt that matches the kind of change** (I.3) and paste it with the form.
+3. Opus finds the affected features in the **feature registry** (I.1), plans the change, asks only what it needs, implements it without breaking existing data or tills, and updates the registry, tests and change log.
+
+### I.1 Feature registry (set up once)
+
+**If your `CLAUDE.md` was copied before this part existed,** first copy two things from Part B into it: the new section "Changing existing features", and the two new lines under "Memory in the repository" (`docs/features/` and `docs/CHANGELOG.md`). Also copy the new concept note (v0.6.2, with the change log in Appendix C) into `docs/concept-note.md`.
+
+The registry is the map Opus uses to find everything a change touches. Run this prompt once, after U0 (or after any milestone if you started fresh). The rules in `CLAUDE.md` then keep the registry up to date on every change.
+
+```text
+Create the feature registry.
+
+1. For every process ID implemented so far (S, B, R, E, F, IN, SA, DOC, RW and the Section 7 roles/usability items), create docs/features/<ID>.md with:
+   - name and one-line purpose;
+   - concept-note section and version it implements;
+   - status: planned / partial / done / deprecated;
+   - modules, main files and APIs;
+   - database tables;
+   - screens and roles;
+   - documents it creates or uses;
+   - settings and feature flags;
+   - tests that prove it;
+   - dependencies on other features;
+   - known limitations.
+2. Create docs/features/INDEX.md: one table listing every feature with its status and links.
+3. Create docs/CHANGELOG.md, following the "Keep a Changelog" style. Record what exists today as the baseline entry.
+4. Don't change application code.
+```
+
+### I.2 Change-request form
+
+Copy, fill in what you know, and leave the rest blank; Opus will ask for anything essential.
+
+```text
+CHANGE REQUEST
+Title:
+Type: [update existing feature | new feature | country/tax rule change | report or screen change | remove feature | concept-note upgrade | bug]
+What should change (in plain words):
+Why (problem or goal):
+Who is affected (roles, business types: supermarket / bar / resto-bar / café, locations):
+Examples (a real case: before → after, with numbers if money is involved):
+Must not change (anything that must keep working exactly as today):
+Effective date (for rules, rates and prices; default: as soon as released):
+Rollout: [all customers | pilot sites first: ... | behind a switch I turn on]
+Deadline or urgency:
+```
+
+### I.3 Prompts for each kind of change
+
+**Every prompt below starts with this opening:**
+
+```text
+Read CLAUDE.md, docs/PROGRESS.md, docs/features/INDEX.md, the registry entries for the features involved, the relevant ADRs and concept-note sections. Follow the "Changing existing features" rules in CLAUDE.md.
+First reply with an impact plan: the features, modules, data, documents, screens and tests affected; any data migration; compatibility with terminals running the previous app version; the rollout (feature flag or not); and the risks. Include any questions whose answer would change the work. Implement after I confirm.
+When finished:
+- update the registry entries, docs/CHANGELOG.md and the concept note (if behaviour changed);
+- run the full test suite and the three-way reconciliation;
+- report what changed, what didn't, and how to roll back.
+```
+
+#### U1. Update an existing feature (small change)
+
+For a behaviour change inside one feature, such as a new field on a receipt, a different default, an extra approval, or a changed calculation.
+
+```text
+[Opening from I.3]
+
+Change request:
+[paste the form]
+
+This is a small, targeted change. Keep the existing design. Make the smallest correct change. Add or adjust tests that prove the new behaviour, and keep a test proving that what "must not change" still works.
+```
+
+#### U2. Upgrade a feature (larger improvement)
+
+For a significant enhancement, such as reworking the promotions engine, adding FIFO costing to live tenants, or a new approval model.
+
+```text
+[Opening from I.3]
+
+Change request:
+[paste the form]
+
+This is a feature upgrade. In the impact plan, also include:
+- the current design and its limits, and the proposed design, recorded in an ADR;
+- how existing data moves to the new design: reversible migrations, and backfills with a reconciliation proof that totals, stock and books are unchanged unless the change intends them to change;
+- how old and new behaviour run side by side during rollout (feature flag per tenant/location, default off, pilot sites first);
+- how issued documents and closed periods stay exactly as they were;
+- the plan for removing the old code path once the new one is proven.
+```
+
+#### U3. Apply a new version of the concept note
+
+Use this every time you update `docs/concept-note.md`. Part H was the first use of this pattern.
+
+```text
+[Opening from I.3]
+
+docs/concept-note.md has been updated from version [old] to version [new]. Its change log (Appendix C) lists what changed.
+
+1. Compare the two versions: use git history for docs/concept-note.md, and read Appendix C. List every added, changed and removed requirement by process ID.
+2. For each one, find the affected features in the registry and classify the work as: no code change / U1 update / U2 upgrade / new feature / removal.
+3. Write docs/upgrade/v[new]-delta.md with that list, the order of work (cores before the modules that depend on them), the migrations needed, and the risks.
+4. Update docs/PROGRESS.md with the resulting tasks and the traceability table.
+Then stop and summarise. I will ask you to implement the tasks one at a time, using U1, U2 or a milestone prompt.
+```
+
+#### U4. Change a country, tax or statutory rule
+
+For a VAT or excise rate, PAYE band, RSSB contribution, withholding tax, EBM specification update, or a newly confirmed rule from concept-note 25.0.
+
+```text
+[Opening from I.3]
+
+Change request:
+[paste the form, including the official source and the effective date]
+
+Rules, rates and thresholds are dated configuration.
+- Add the new value with its effective date. Don't overwrite the old one: transactions before the effective date keep the old rule, and reports across the boundary use the right rule for each date.
+- Don't reissue or change documents that were already issued.
+- If the change needs code (for example, a new EBM specification version), keep the old behaviour until the effective date, test both sides of the boundary, and rerun the RW certification test suite.
+- Update concept-note 25.0 and docs/compliance/<country>.md with the source.
+```
+
+#### U5. Change a report, dashboard or screen
+
+```text
+[Opening from I.3]
+
+Change request:
+[paste the form]
+
+Keep numbers consistent with the Finance core: every figure must still reconcile to the books.
+For screens, follow the role and environment rules (concept-note 7.2–7.8, CLAUDE.md UX standards). Take before and after screenshots at the target device sizes, and check the speed targets still pass.
+If a report's definition changes (what a number means), show the old and new definition in the report's help text for one release.
+```
+
+#### U6. Remove or replace a feature
+
+```text
+[Opening from I.3]
+
+Change request:
+[paste the form]
+
+Deprecate before removing:
+- mark the feature deprecated in the registry, hide it behind a flag, and tell users in the UI;
+- keep data and documents readable for the 10-year retention period;
+- migrate or archive related settings.
+Remove code only after I confirm that no tenant uses it. Don't delete financial, stock, document or audit data.
+```
+
+#### U7. Upgrade the technology (framework, library, database, platform)
+
+```text
+[Opening from I.3]
+
+Upgrade [component] from [version] to [version].
+- Read the official migration guide.
+- Upgrade in small steps, with the full test suite green after each step.
+- Check performance budgets and the offline chaos suite.
+- Record the decision in an ADR and the result in the change log.
+- Don't mix feature changes into this work.
+```
+
+#### U8. Check for regressions after any change
+
+```text
+Use a sub-agent with a fresh context to check the change on this branch for regressions. Give it CLAUDE.md, the change request, the impact plan, the registry entries involved and the diff.
+It must:
+- run the full test suite, the three-way reconciliation, the books accuracy drill (E.9) and, for Rwanda, the RW certification suite;
+- walk through the affected document flows (E.10) and role screens;
+- confirm everything under "must not change" still behaves exactly as before;
+- report problems with file:line references.
+Then fix them and rerun the checks.
+```
+
+### I.4 Which prompt to use
+
+| You want to… | Use |
+|---|---|
+| Tweak how an existing feature behaves | **U1** |
+| Significantly improve or redesign a feature | **U2** |
+| Apply a new version of the concept note | **U3** |
+| Change a tax rate, statutory rule or RRA specification | **U4** |
+| Change a report, dashboard or screen | **U5** |
+| Remove or replace a feature | **U6** |
+| Upgrade frameworks, libraries or infrastructure | **U7** |
+| Add something that doesn't exist yet | **E.5** (change request), then a milestone-style prompt |
+| Fix a bug | **E.4** |
+| After any of the above, before merging | **U8**, then **E.2** code review |

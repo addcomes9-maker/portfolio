@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Document type** | Concept note (draft for discussion) |
-| **Version** | 0.6.1: records the product owner's confirmation of six Rwanda rules (Section 25.0). v0.6 set **Rwanda as the first market** (Section 25): VAT, RRA electronic invoicing (EBM via VSDC), receipt types, VAT reward, record keeping, withholding tax, excise, IFRS for SMEs, payroll, mobile money over eKash, data residency and localisation. v0.5 added **business documents and document flows** (Section 24): the full procurement → delivery → invoicing → payment cycle and the selling cycle, with each document's effect on stock and the books, and the document engine. v0.4 made **Finance, Inventory and Sales the three core pillars** of the platform (Sections 19–23): built-in accounting books, books health checks and error correction, perpetual inventory posted to the books, and a sales core with quick reports and insight-to-task. Sections 1–18 keep their numbers. v0.3 added management roles, users and usability for each service (Section 7) and the barista / coffee station process (R15). v0.2 added the process-by-process feature design and positioning over existing POS and ERP systems. |
+| **Version** | 0.6.2: adds a change log (Appendix C) so each new version can be applied to the build through prompt U3. v0.6.1 recorded the product owner's confirmation of six Rwanda rules (Section 25.0). v0.6 set **Rwanda as the first market** (Section 25): VAT, RRA electronic invoicing (EBM via VSDC), receipt types, VAT reward, record keeping, withholding tax, excise, IFRS for SMEs, payroll, mobile money over eKash, data residency and localisation. v0.5 added **business documents and document flows** (Section 24): the full procurement → delivery → invoicing → payment cycle and the selling cycle, with each document's effect on stock and the books, and the document engine. v0.4 made **Finance, Inventory and Sales the three core pillars** of the platform (Sections 19–23): built-in accounting books, books health checks and error correction, perpetual inventory posted to the books, and a sales core with quick reports and insight-to-task. Sections 1–18 keep their numbers. v0.3 added management roles, users and usability for each service (Section 7) and the barista / coffee station process (R15). v0.2 added the process-by-process feature design and positioning over existing POS and ERP systems. |
 | **Date** | September 2026 |
 | **Scope** | Point-of-sale (POS) and store-management platform for three verticals: supermarkets / grocery, bars / pubs / lounges, and resto-bars (restaurant + bar hybrids) |
 | **Basis** | (a) How these businesses run each process manually today; (b) the features of POS platforms in wide use (Toast, Square, Lightspeed, Clover, TouchBistro, Revel, Shift4/SkyTab, Oracle MICROS Simphony, NCR Voyix/Aloha, IT Retail, LOC, and bar-inventory tools such as BinWise and BevSpot); (c) the features of ERP systems with POS or retail modules (Odoo, ERPNext, LS Central on Microsoft Dynamics 365 Business Central, Microsoft Dynamics 365 Commerce, SAP, Oracle Retail Xstore). See **Sources**. |
@@ -52,6 +52,7 @@
 25. Country profile: Rwanda (first market) (RW1–RW14)
 - Appendix A: Feature matrix by mode
 - Appendix B: Glossary
+- Appendix C: Change log
 - Sources
 
 ---
@@ -1883,6 +1884,29 @@ Offline selling (Section 8.2) must still produce signed fiscal receipts:
 - **Three-way match:** Checking a supplier invoice against the purchase order and goods received note before paying.
 - **UoM:** Unit of measure.
 - **Variance:** The difference between the stock that should have been used (according to sales) and the stock actually used (according to counts).
+
+---
+
+## Appendix C: Change log
+
+Use this log with prompt U3 in the implementation guide: each new version lists what was added, changed or removed, by section and process ID.
+
+| Version | Date | Changes |
+|---|---|---|
+| 0.1 | 26 Sep 2026 | First draft: vision, market landscape, solution modules, hardware, payments and security, integrations, KPIs, implementation, commercial model, risks |
+| 0.2 | 26 Sep 2026 | Added Section 5 (positioning over existing POS and ERP systems; deployment Modes 1–3; system-of-record matrix) and Section 6 (process-by-process design: S1–S15, B1–B13, R1–R14, E1–E9) |
+| 0.3 | 26 Sep 2026 | Added Section 7 (management roles, permissions matrix, routines, usability by environment, staff experience) and R15 (barista station); sections 7–17 renumbered to 8–18 |
+| 0.4 | 27 Sep 2026 | Added Sections 19–23: Finance, Inventory and Sales as core pillars (F1–F19, IN1–IN11, SA1–SA12), core contracts, three-way reconciliation, build order |
+| 0.5 | 27 Sep 2026 | Added Section 24: business documents and document flows (DOC1–DOC12), buying and selling flows, worked examples |
+| 0.6 | 27 Sep 2026 | Added Section 25: Rwanda as first market (RW1–RW14): EBM/VSDC, tax types, VAT reward, record keeping, WHT, excise, IFRS for SMEs, payroll, mobile money, data residency, localisation |
+| 0.6.1 | 27 Sep 2026 | Added 25.0: rules 1–6 confirmed (advance VAT, TIN reissue, seller debit note, VAT rounding, full stock reporting, WHT); rules 7a, 7b, 8, 9 not confirmed (settings); event-deposit example in 25.10 |
+| 0.6.2 | 27 Sep 2026 | Added this change log (Appendix C) to support updates through the implementation guide's Part I |
+
+**How to add a version:**
+1. Make the change in the relevant section.
+2. Bump the version in the header table.
+3. Add a row here listing the sections and process IDs added, changed or removed.
+4. Run prompt U3 in your product repository.
 
 ## Sources
 
