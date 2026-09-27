@@ -2,17 +2,20 @@
 
 This guide contains the prompts to give **Claude Opus 5.5** (in Claude Code or a similar agentic coding environment) to build the system described in `POS_Concept_Note.md`: a cloud-native, offline-first POS with ERP-grade back office for supermarkets, bars, resto-bars and cafés.
 
-It has seven parts:
+> **Updated for concept note v0.4.** Finance, Inventory and Sales are now the three core pillars of the system, built in that order through the new core prompts **C1 (Finance), C2 (Inventory) and C3 (Sales)**. If you already started building from the earlier version, go to **Part H** for the upgrade path.
+
+It has eight parts:
 
 | Part | What it is | When you use it |
 |---|---|---|
 | **A** | How to run the build | Read once before starting |
 | **B** | `CLAUDE.md`, the project rules file | Copy into the new repository before the first session |
 | **C** | Prompt 0: architecture and plan | First session |
-| **D** | Milestone prompts M0–M14 | One milestone per session, in order |
+| **D** | Core prompts C1–C3 and milestone prompts M0–M14 | One milestone per session, in the order in A.3 |
 | **E** | Reusable prompts (verify, review, resume, fix, UI) | Any time |
 | **F** | Quality gates and invariants | At the end of every milestone |
 | **G** | Tips for working with Opus 5.5 | Keep at hand |
+| **H** | Upgrade path for a build already in progress | Now, if you started with the earlier version |
 
 ---
 
@@ -21,10 +24,10 @@ It has seven parts:
 ### A.1 Setup
 
 1. Create a **new, empty repository** for the product (for example `unified-pos`). Don't build it inside a portfolio or documents repository.
-2. Copy `POS_Concept_Note.md` into it as **`docs/concept-note.md`**. This is the specification. Every prompt below refers to it by section number (S1–S15, B1–B13, R1–R15, E1–E9, Section 5 deployment modes, Section 7 roles and usability).
+2. Copy `POS_Concept_Note.md` into it as **`docs/concept-note.md`**. This is the specification. Every prompt below refers to it by section number (S1–S15, B1–B13, R1–R15, E1–E9, the core IDs F1–F19, IN1–IN11 and SA1–SA12, Section 5 deployment modes, Section 7 roles and usability, Sections 19–23 core pillars).
 3. Copy Part B of this guide into the repository root as **`CLAUDE.md`**. Claude Code reads it automatically at the start of every session, so the rules persist across sessions.
 4. Fill in the **"Project facts"** block at the top of `CLAUDE.md`: countries, currencies, languages, first customers, and the ERP and payment providers to support first. Leave anything unknown as "TBD". Prompt 0 will list the open questions.
-5. Choose model **Claude Opus 5.5**. Use effort **`xhigh`** for Prompt 0, milestones M1, M3, M4, M10 and M14 (architecture-heavy, correctness-critical). Use **`high`** for the others. Lower effort only for small fixes.
+5. Choose model **Claude Opus 5.5**. Use effort **`xhigh`** for Prompt 0, the core milestones C1, C2 and C3, and milestones M1, M4, M10 and M14 (architecture-heavy, correctness-critical). Use **`high`** for the others. Lower effort only for small fixes.
 
 ### A.2 Working rhythm
 
@@ -40,22 +43,34 @@ It has seven parts:
 Prompt 0  Architecture, domain model, milestone plan (no code)
 M0   Repository foundation, CI, dev environment
 M1   Platform core: tenants, locations, identity, roles, permissions, approvals, audit
+C1   FINANCE CORE: posting engine, accounting books, ledgers, reconciliations,
+     books health checks and error correction, close, owner view (F1–F19)
 M2   Catalogue: item master, units, barcodes, tax, modifiers, recipes, price books
-M3   Inventory engine: stock ledger, batches/expiry, counts, transfers, costing
-M4   POS terminal core: offline-first selling, shifts, cash, receipts, sync
-M5   Payments: provider abstraction, pre-auth tabs, tips, refunds, reconciliation
-M6   Purchasing, receiving, supplier invoices, three-way match
+C2   INVENTORY CORE: perpetual stock ledger posted to the books, valuation, GRNI,
+     counts and variance, inventory–finance reconciliation (IN1–IN11)  [replaces M3]
+C3   SALES CORE: sales documents posted to stock and books, tenders and clearing,
+     Z-close, quick reports, insight-to-task, three-way reconciliation (SA1–SA12)
+M4   POS terminal apps: offline-first selling UI on top of the Sales core
+M5   Payments: provider abstraction, pre-auth tabs, tips, refunds, settlement postings
+M6   Purchasing, receiving, supplier invoices, three-way match, AP postings
 M7   Supermarket mode (S1–S15)
 M8   Bar mode (B1–B13)
 M9   Resto-bar and café mode (R1–R15)
-M10  Finance core and ERP integration hub (E1–E9, Modes 1–3)
+M10  ERP integration hub (Modes 2 and 3)  [finance core moved to C1]
 M11  Management layer: role dashboards, routines, tasks, staff app, scheduling
 M12  Reporting, analytics and AI features
 M13  Intelligence layer over existing POS systems (Mode 3)
 M14  Hardening: security, performance, offline chaos tests, accessibility, usability, release
 ```
 
-M0–M6 build the shared foundation. M7–M9 can be reordered to match your first customer (for example, bar before supermarket).
+**Why this order.**
+- **Finance comes first** because it is the reference every other module must reconcile to.
+- **Inventory comes second** because it holds most of the value and produces COGS.
+- **Sales comes third** because it depends on both.
+
+Only M1 (identity and permissions) and M2 (the catalogue that inventory needs) come before or between the cores. Milestone numbers are kept from the earlier version so existing references stay valid. M3 is replaced by C2.
+
+The vertical modes (M7–M9) can be reordered to match your first customer (for example, bar before supermarket).
 
 ---
 
@@ -81,6 +96,16 @@ It must beat typical cloud POS products on back-office control, and beat ERP POS
 It runs in three deployment modes: standalone (Mode 1); POS front end on an existing ERP (Mode 2); intelligence layer over an existing POS and ERP (Mode 3).
 
 **The specification is `docs/concept-note.md`.** Process IDs (S1–S15 supermarket, B1–B13 bar, R1–R15 resto-bar/café, E1–E9 back office) and Section 7 (roles, permissions, management routines, usability) are the functional requirements. When code implements a process, reference its ID in the module README and in tests.
+
+## Core pillars: Finance → Inventory → Sales (concept note Sections 19–23)
+- Finance, Inventory and Sales are the three core modules, built in that order. Every other module (payments, purchasing, supermarket/bar/resto-bar modes, people, management, reporting, AI, integrations) is built on them.
+- Only the cores write money and stock. Other modules use the core contracts: `postJournal` (Finance), `recordStockMovement` (Inventory) and `completeSale` (Sales). No other module writes journal lines, stock movements or balances directly. An architecture test enforces this.
+- One event, three views: a sale, its stock movements and its journal are committed together (one transaction or an exactly-once outbox). None exists without the others.
+- The books of original entry and ledgers (concept note 20.2) are views over one journal store, not separate copies.
+- Every journal links to a source document. Posted entries are never edited or deleted; corrections go through the correction wizard (reversal, reclassification, amount correction) with reason, approval and audit.
+- A posting that fails is never dropped: it is held in the finance issue inbox and shown as "unposted" until fixed.
+- The three-way reconciliation (23.3) runs nightly and in the test suite. Any failure is a bug or a finance issue, never ignored.
+- Process IDs: F1–F19 (finance), IN1–IN11 (inventory), SA1–SA12 (sales). Reference them in module READMEs and tests.
 
 ## Memory in the repository
 - `docs/PROGRESS.md`: milestone status, what's done, what's next, known issues. Update it at the end of every work session and whenever a milestone task finishes.
@@ -148,6 +173,8 @@ Read CLAUDE.md and docs/concept-note.md in full. This is the specification for a
 
 Your task in this session is to design the system and plan the build. Do not write application code yet.
 
+Finance, Inventory and Sales are the three core pillars (concept note Sections 19–23). Design them and their contracts (postJournal, recordStockMovement, completeSale) first. Every other module must be designed to use them rather than writing money or stock data itself.
+
 Produce these files:
 
 1. docs/architecture.md
@@ -166,8 +193,8 @@ Produce these files:
 3. docs/adr/0001... : one ADR for each key decision (stack, modular monolith, sync approach, money/quantity representation, tenancy isolation, event/outbox approach, device platforms, costing method support, how fiscal connectors plug in).
 
 4. docs/PROGRESS.md
-   - The milestone plan M0–M14 (use the list in the prompt guide as a starting point and adjust if the design suggests a better order). For each milestone: goal, process IDs covered, acceptance criteria that can be verified, and the main risks.
-   - A traceability table mapping every process ID in the concept note (S1–S15, B1–B13, R1–R15, E1–E9) and every Section 7 subsection to the milestone that delivers it. Nothing may be left unmapped; mark items explicitly "Later" if they are out of the first release.
+   - The milestone plan (M0, M1, C1, M2, C2, C3, M4–M14; use the list in the prompt guide as a starting point and adjust if the design suggests a better order). For each milestone: goal, process IDs covered, acceptance criteria that can be verified, and the main risks.
+   - A traceability table mapping every process ID in the concept note (S1–S15, B1–B13, R1–R15, E1–E9, F1–F19, IN1–IN11, SA1–SA12) and every Section 7 subsection to the milestone that delivers it. Nothing may be left unmapped; mark items explicitly "Later" if they are out of the first release.
 
 5. docs/open-questions.md
    - Decisions only the product owner can make (for example: jurisdictions and fiscal rules, first ERP connector, payment providers, which costing methods to support, data residency). For each, give your recommended default so work can proceed if I agree.
@@ -230,6 +257,50 @@ Out of scope: sales, catalogue, inventory.
 Done when: property/integration tests prove every row of the 7.5 matrix; approval flow works end to end in the demo (bartender requests a comp over budget → manager approves on phone → action completes and is audited); tenant isolation tests show no cross-tenant access through any API.
 ```
 
+### C1. FINANCE CORE (first core pillar)
+
+Use effort `xhigh`.
+
+```text
+[Standard opening]
+
+Core milestone C1: FINANCE CORE. Concept note: Sections 19 and 20 (all), 23.3–23.5; E1–E9 (summaries, now mapped to F-IDs); 7.5 (approvals); owner and accountant roles in 7.2–7.4.
+
+Finance is the first of the three cores. Inventory (C2) and Sales (C3) will post into it, so design its contracts for them now.
+
+Build:
+- Setup (F1): chart-of-accounts templates per business type (supermarket, bar, resto-bar, café, mixed) with account classes and control-account flags; dimensions (entity, location, department, cost centre, event) on every journal line; fiscal years and periods; multi-entity; multi-currency with revaluation; opening-balance import with validation.
+- Posting engine (F2): the postJournal contract from concept note 19.3. Journals are balanced by construction and idempotent by source-document key; the engine applies open-period, account-class and dimension rules, links each journal to its source document and writes an audit event. Posting rules are configurable (document type and attributes → accounts), with a rules editor and a preview that shows the journal a document would produce. Failed postings go to the issue inbox and are never dropped.
+- Books of original entry (F3): cash book, bank book, petty cash book, daily sales book, sales day book, sales returns day book, purchases day book, purchases returns day book, expense book, other income register, general journal. The books are views over the single journal store, not separate copies. Each book uses the familiar layout (date, reference, particulars, debit, credit, running balance), with filters, drill-down to the source document, and print/PDF/Excel export.
+- Ledgers and registers (F4, F11–F14): general ledger; debtors and creditors ledgers with enforced control accounts; fixed asset register with depreciation; tax register; tips and service charge ledger; deposits, gift cards and vouchers ledger; capital, loans and drawings.
+- Income and expense tracking for owners (F5): simple money-in/money-out view by category in plain language; expense capture by phone photo with OCR behind an interface (a mock is fine now; a real implementation comes in M12); recurring bills with reminders; budget alerts. Every number drills down to the accountant view and matches it to the cent.
+- Petty cash (F6): imprest floats, vouchers with photos, approvals, top-ups.
+- Bank and cash (F7): bank accounts, statement import (CSV and the standard formats used in the target countries, e.g. OFX/CAMT.053/MT940) and a bank-feed interface, deposits, transfers, safes and tills as cash accounts.
+- Reconciliations (F8): bank (auto-match rules and suggestions), cash, clearing accounts, control accounts, tax, liabilities, inter-company. Leave hooks for the inventory reconciliation that C2 will add.
+- Accounts receivable and payable (F9, F10): invoices, credit and debit notes, receipts, payments, payment runs, statements, ageing, reminders.
+- Tax (F11): tax engine (rates, inclusive/exclusive, exemptions, rounding per jurisdiction), tax register, return-preparation report, and the fiscal/e-invoicing connector interface with a mock.
+- Payroll and tips posting (F13): import payroll journals; tips and service charge liabilities.
+- Books health and error correction (F15):
+  - Every check in concept note 20.5 (omission, commission, principle, original entry, reversal, compensating, transposition, duplication, cut-off, unexplained differences, suspense) as a rule with a severity, a plain-language explanation and a suggested fix.
+  - The issue inbox.
+  - The correction wizard (reverse and re-enter, reclassify, correct amount, move period), which generates correcting journals with reason, link and attachment, with approvals above thresholds.
+  - Handling for closed periods, and the "what changed" report.
+- Period and year-end close (F16): guided checklist; blocking conditions (unreconciled items, suspense not zero, open high-severity issues); lock; controlled reopening with two approvals; year-end roll-forward to retained earnings.
+- Statements and reports (F17): trial balance, P&L by any dimension, balance sheet, cash-flow statement (indirect), statement of changes in equity, aged debtors and creditors, tax report, daily flash P&L, and a one-click accountant pack export.
+- Budgets and cash forecast (F18).
+- Roles and collaboration (F19): bookkeeper, accountant, finance manager, owner, and external accountant/auditor (read-only) role templates added to the M1 permission seed; comments and document requests on entries.
+- Seed data: a demo company for each business type with three months of finance activity, including deliberately planted examples of every error type in 20.5, so health checks and the correction wizard can be demonstrated.
+
+Out of scope: stock movements (C2), sales documents (C3), external ERP connectors (M10). Build test doubles that call postJournal the way C2 and C3 will.
+
+Done when:
+- Property-based tests prove: every journal balances; the trial balance always balances; sub-ledgers equal their control accounts; closed periods reject postings; reposting the same source document creates no duplicate.
+- Every planted error in the seed data is detected by a health check, explained in plain language, and corrected through the wizard with a full audit trail, and the "what changed" report lists the correction.
+- A month-end close runs end to end on seed data, including bank reconciliation. The statements tie out: the balance sheet balances, and P&L profit equals the change in retained earnings.
+- Every book in concept note 20.2 opens in the familiar layout, and the owner's simple view agrees with the accountant view to the cent.
+- The milestone report reminds me that a qualified accountant should review the chart-of-accounts templates and posting rules before the pilot.
+```
+
 ### M2. Catalogue and item master
 
 ```text
@@ -252,26 +323,77 @@ Out of scope: promotions engine (M7), stock quantities (M3).
 Done when: seed data contains a realistic supermarket catalogue (including weighed produce and deli items), a bar menu with recipes and pour sizes, a restaurant menu with sub-recipes and allergens, and a café menu with a full drink builder; unit conversion and price-resolution logic have property-based tests.
 ```
 
-### M3. Inventory engine
+### M3. Inventory engine: replaced by C2
+
+The old M3 is superseded by core milestone **C2** below. If your build already completed M3, run C2 as a refactor of that work (Part H).
+
+### C2. INVENTORY CORE (second core pillar, replaces M3)
+
+Use effort `xhigh`. If your build already completed M3, use this prompt as a refactor of that work (see Part H).
 
 ```text
 [Standard opening]
 
-Milestone M3: inventory engine. Concept note: S11, S12 (tracking part), B1, B5 (engine part), B12 (container ledger), R10, R11, Section 5.1 D3.
+Core milestone C2: INVENTORY CORE. This replaces the old M3. Concept note: Section 21 (all), 19.3, 23.2–23.4; S11, S12 (tracking), B1, B5 (engine), B12 (containers), R10, R11; Section 5.1 D3.
+
+Inventory is perpetual: every movement records quantity and value, and posts to the books through the Finance core (C1).
 
 Build:
-- Stock ledger with movement types: receipt, sale depletion (by recipe), return, transfer out/in (with in-transit), adjustment, waste (with reason), production (consume ingredients, create output), count variance, container issue/return.
-- Stock locations per site (shop floor, back store, cold room, bar stations, cellar, kitchen stations).
-- Batch/lot and expiry tracking with FEFO suggestions; expiring-soon queries.
-- Costing: weighted average cost as default; FIFO as an option per tenant (ADR); cost of goods sold per movement for later finance posting.
-- Par levels per location; requisitions from store room to bar/kitchen.
-- Counts: full and cycle counts (ABC scheduling), blind counts, partial bottles by tenths or by weight (item stores empty and full weights), recount rules, variance approval using the M1 permission engine.
-- Theoretical vs actual usage and variance calculation per item, category, location, station and period (engine and API; dashboards come later).
-- Returnable containers ledger (kegs, crates, gas cylinders, bottles) with deposits.
+- The recordStockMovement contract from 19.3. Each movement records quantity and value and calls postJournal using the mapping in concept note 21.1, configurable per tenant through C1 posting rules.
+- Stock ledger with every movement type in 21.1: receipt, sale depletion by recipe, customer return, return to supplier, transfer out/in via in-transit, production (consume ingredients, create output), waste, comps/spills/staff consumption, count variance, revaluation, container issue/return.
+- Stock locations per site (shop floor, back store, cold room, bar stations, cellar, kitchen stations, café); par levels; requisitions from store room to bar and kitchen (IN2, IN5).
+- Valuation and costing (IN3): weighted average (default), FIFO (option per tenant), landed costs, recipe cost roll-up, and automatic revaluation entries when negative stock is later corrected.
+- Receiving and GRNI (IN4): a receipt before its invoice creates the GRNI accrual. Provide the hooks M6 will use for invoice matching, price differences and debit notes.
+- Production and yield variance (IN6); counts (full, cycle with ABC scheduling, blind, partial bottles by tenths or weight, recount rules, variance approval), with variance posted to the books (IN7).
+- Classification of waste, comps, spills, staff consumption and shrink to separate expense accounts (IN8); batch, lot and expiry with FEFO (IN9).
+- Theoretical vs actual usage and variance per item, category, location, station and period, in quantity and money.
+- Inventory–finance reconciliation (IN10), nightly and on demand: stock valuation equals the GL inventory accounts; the GRNI listing equals the GRNI account; COGS in the stock ledger equals COGS in the GL. Differences become F15 issues with a suggested fix.
+- Inventory insights (IN11): stock value by location and category, days of cover, stock turn, dead stock, reorder needs, variance hot spots (API plus simple screens on the relevant role home screens).
 
-Out of scope: purchasing documents (M6), POS UI (M4).
+Out of scope: purchasing documents (M6), sales documents (C3).
 
-Done when: property-based tests prove on-hand always equals the sum of movements, no negative stock unless the location allows it, costing is correct across receipts and sales, and variance equals theoretical minus actual on scripted scenarios (for example, a bar week with known over-pouring).
+Done when:
+- Property-based tests prove that on-hand always equals the sum of movements, and that stock valuation equals the GL inventory accounts at any point in time.
+- The GRNI listing always equals the GRNI account.
+- Every movement type in 21.1 produces the expected journal.
+- The worked supermarket example in concept note 23.2 reproduces exactly.
+- A scripted bar week with seeded over-pouring shows correct variance in both quantity and money, and the variance appears in the P&L.
+```
+
+### C3. SALES CORE (third core pillar)
+
+Use effort `xhigh`.
+
+```text
+[Standard opening]
+
+Core milestone C3: SALES CORE. Concept note: Section 22 (all), 19.3, 23.1, 23.3, 23.4; S5, S8, S10, S13, B3, B8, B10, R7, R14.
+
+Sales is the third core. It works with Inventory (C2) and Finance (C1) so every sale produces correct stock and correct books, and so owners get quick reports and simple tasks.
+
+Build (server-side domain and APIs; the terminal apps come in M4):
+- Sales document model (SA1): receipt, tab, table bill, credit invoice, online, delivery, QR and self-checkout orders.
+- The completeSale contract from 19.3. It finalises the document, depletes stock through C2 and posts through C1 as in 22.1, all in one transaction or through an exactly-once outbox.
+- Tenders and clearing accounts (SA2): cash, card, mobile money, customer account, gift card and deposit; settlement clears to the bank, with fees and chargebacks posted.
+- Discounts and promotions accounting, including vendor-funded claims (SA3).
+- Returns, refunds and credit notes (SA4): posted to the sales returns day book, with stock returned or written off.
+- Credit sales to the debtors ledger (SA5).
+- Deposits, gift cards and vouchers as liabilities (SA6).
+- Tips and service charges (SA7).
+- Daily sales close (SA8): Z-close per terminal and location, posted to the daily sales book, with cash over/short.
+- Real-time margin per line, sale, category and shift (SA9).
+- Quick reports (SA10): every report in 22.2, with the same plain-language names, each available as an API and as a screen on the home screens of the roles listed for it.
+- Insight-to-task engine (SA11): rules that create tasks from findings in all three cores (examples in 22.3), assigned by role, with a due time, closing automatically when the underlying issue is resolved.
+- Channel sales with commissions (SA12).
+- The daily three-way reconciliation job (23.3) covering all six checks. Failures create F15 issues and SA11 tasks.
+
+Out of scope: terminal apps (M4), real payment providers (M5), vertical-specific flows (M7–M9).
+
+Done when:
+- The worked example in concept note 23.1 (gin and tonic on a card tab with tip, settled the next day) reproduces exactly in sales, stock and journals.
+- A seeded week of mixed trading (supermarket, bar, resto-bar and café) passes the three-way reconciliation every night.
+- Deliberately broken cases (an unmapped tax code, a missing card settlement, an item sold without a recipe) are detected and appear as finance issues and tasks.
+- Every quick report answers its question on seed data and agrees with the finance statements.
 ```
 
 ### M4. POS terminal core (offline-first)
@@ -279,7 +401,7 @@ Done when: property-based tests prove on-hand always equals the sum of movements
 ```text
 [Standard opening]
 
-Milestone M4: POS terminal core. Concept note: S5, S10, S8 (basic refund), Section 8 design principles (offline, conflict rules), Section 7.7 and 7.8 (usability), 7.5 (permissions at the till).
+Milestone M4: POS terminal apps on top of the Sales core (C3). The terminals create and complete sales documents only through the Sales core contracts; they never post to the books or deplete stock themselves. Concept note: S5, S10, S8 (basic refund), 22.1, Section 8 design principles (offline, conflict rules), Section 7.7 and 7.8 (usability), 7.5 (permissions at the till).
 
 Build:
 - Terminal apps (Expo for Android/iOS, Tauri for lane PCs) sharing one UI package; device pairing; staff login and fast switching from M1.
@@ -295,7 +417,7 @@ Build:
 
 Out of scope: tabs, tables, KDS, promotions, scales.
 
-Done when: automated end-to-end tests cover selling, paying, refunding and closing a shift; an offline chaos test (network cut mid-sale, device restarts, two terminals offline for an hour, then reconnect) shows no lost or duplicated sales and correct stock; speed targets from CLAUDE.md are measured by an automated UI test and reported.
+Done when: automated end-to-end tests cover selling, paying, refunding and closing a shift; an offline chaos test (network cut mid-sale, device restarts, two terminals offline for an hour, then reconnect) shows no lost or duplicated sales, correct stock and correct books (the three-way reconciliation passes after the test); speed targets from CLAUDE.md are measured by an automated UI test and reported.
 ```
 
 ### M5. Payments
@@ -303,7 +425,7 @@ Done when: automated end-to-end tests cover selling, paying, refunding and closi
 ```text
 [Standard opening]
 
-Milestone M5: payments. Concept note: Section 10 (payments, security), B3, B8, S10 (settlement part), E4.
+Milestone M5: payments. Concept note: Section 10 (payments, security), B3, B8, S10 (settlement part), E4, SA2, SA7, F8.
 
 Build:
 - Payment provider abstraction (ADR): authorise, capture, pre-authorise, incremental authorise, adjust tip, void, refund, store-and-forward offline with configured per-transaction and total limits, and settlement report import. Implement a full mock provider plus one real provider adapter chosen in docs/open-questions.md (or a sandbox-only adapter if none is chosen yet).
@@ -312,7 +434,9 @@ Build:
 - Mobile money and QR payment adapter interface with a mock implementation.
 - Settlement reconciliation: match provider settlements, fees and chargebacks to shifts and bank deposits; unmatched items queue.
 
-Out of scope: finance journal posting (M10).
+Finance: post tenders, tips, settlements, fees and chargebacks through the Finance core clearing accounts (SA2, F8). Card-settlement reconciliation uses the C1 reconciliation framework.
+
+Out of scope: vertical-specific payment flows (M7–M9).
 
 Done when: contract tests pass for the provider interface; the mock provider simulates declines, timeouts, partial approvals, offline store-and-forward and late declines, and the POS handles each correctly; a documented PCI scope statement exists in docs/security/.
 ```
@@ -322,7 +446,7 @@ Done when: contract tests pass for the provider interface; the mock provider sim
 ```text
 [Standard opening]
 
-Milestone M6: purchasing. Concept note: S2, S3, B12 (purchasing part), E3, Section 5.3 (supplier and PO ownership in Mode 2).
+Milestone M6: purchasing. Concept note: S2, S3, B12 (purchasing part), E3, F10, IN4, 23.2, Section 5.3 (supplier and PO ownership in Mode 2).
 
 Build:
 - Suppliers with catalogues, pack sizes, MOQ, lead times, price history, delivery schedules (including DSD suppliers).
@@ -333,9 +457,11 @@ Build:
 - Supplier invoices: capture by upload with OCR extraction (behind an interface; implementation may use the AI module later), three-way match with tolerances, exception routing for approval.
 - Supplier scorecards.
 
-Out of scope: accounts payable payment runs (M10).
+Finance and inventory: receipts use the C2 receiving contract (GRNI accrual, IN4); matched supplier invoices post to the purchases day book and creditors ledger through the C1 AP functions (F10), clearing GRNI; debit notes post to the purchases returns day book; approved invoices flow into C1 payment runs.
 
-Done when: end-to-end tests cover order → receive with discrepancy → claim → invoice match → approval; stock and cost update correctly in the ledger.
+Out of scope: ERP connectors (M10).
+
+Done when: end-to-end tests cover order → receive with discrepancy → claim → invoice match → approval; stock, cost, GRNI and the creditors ledger update correctly, and the worked example in concept note 23.2 reproduces through the real purchasing screens.
 ```
 
 ### M7. Supermarket mode
@@ -413,28 +539,22 @@ Build:
 Done when: scripted demo "Dinner service" passes: reservations and walk-ins, 40 covers, coursing with a delayed main, an allergy order, a sold-out item synced to QR and delivery, split bills, delivery orders, and a café rush with order-ahead; ticket times and food cost calculate correctly.
 ```
 
-### M10. Finance core and ERP integration hub
+### M10. ERP integration hub (finance core moved to C1)
 
 ```text
 [Standard opening]
 
-Milestone M10: finance and integration. Concept note: E1–E9, Section 5 (5.2 deployment modes, 5.3 system of record, 5.4 integration principles), Section 11 (integrations).
+Milestone M10: ERP integration hub. The finance core was built in C1; this milestone connects it, and the inventory and sales cores, to external systems. Concept note: Section 5 (5.2 deployment modes, 5.3 system of record, 5.4 integration principles), Section 11 (integrations), E1–E9 / F-IDs for what is exchanged.
 
-Build (finance core for Mode 1, ERP-grade):
-- Chart of accounts templates, double-entry journals (balanced by construction), fiscal periods with close/lock, multi-entity and multi-currency with exchange rates.
-- Posting rules: sales, tax, tenders, tips, discounts, service charges, COGS, waste, count variances, cash over/short, settlements and fees; per transaction, per shift or daily summary.
-- Accounts receivable (customer credit accounts, statements, ageing) and accounts payable (supplier invoices from M6, payment runs, ageing).
-- Tax engine: multiple rates, inclusive/exclusive, exemptions, rounding per jurisdiction; tax reports.
-- Fiscal/e-invoicing connector interface (per-country plug-ins) with a mock and one real implementation if the jurisdiction is known.
-- Management reports: trial balance, P&L by location/department, balance sheet, budget vs actual, daily flash P&L, prime cost.
-
-Build (integration hub for Modes 2 and 3):
+Build:
 - Connector framework: authentication, field mapping UI (items, taxes, tenders, GL accounts, cost centres, locations), sync schedules, idempotent messages, retries, dead-letter/error queue with fix-and-resend, reconciliation reports, full logging.
+- Mode 2 (our POS on the customer's ERP): the customer's ERP can be the financial system of record. Our Finance core still produces the journals and books (so health checks and reconciliations keep working). It exports them to the ERP per transaction, per shift or as daily summaries, and reconciles that the ERP received exactly what was sent.
 - System-of-record configuration per data object as in 5.3, enforced by the sync logic.
 - Connectors in priority order from docs/open-questions.md. Default order: Odoo, ERPNext, QuickBooks Online, Xero; then Dynamics 365 Business Central and SAP Business One. Each connector ships with contract tests against a sandbox or recorded fixtures.
 - Generic API/webhook and CSV/SFTP connectors.
+- Export of the accountant pack (F17) in formats the customer's accountant can import.
 
-Done when: every posting rule is covered by tests that assert balanced journals; a month of seeded demo trading closes cleanly with a trial balance that ties to sales, stock and cash reports; the first ERP connector passes a round trip (items in, sales/journals/POs out) with duplicate-delivery and failure-recovery tests.
+Done when: the first ERP connector passes a round trip (items in; sales, journals, supplier invoices and POs out) with duplicate-delivery and failure-recovery tests; after a seeded month, the trial balance in the ERP equals the trial balance in our Finance core for the exported accounts.
 ```
 
 ### M11. Management layer and staff experience
@@ -573,6 +693,13 @@ Add a [ERP/POS/payment/aggregator] connector for [system]. Follow the connector 
 Add support for [country]. Research the current VAT/GST/sales-tax rules, rounding rules, receipt and invoice requirements, and fiscal device or e-invoicing obligations from official sources, and list the sources in docs/compliance/[country].md. Implement tax configuration and a fiscal connector plug-in behind the existing interface. Ask me before any legal interpretation that is ambiguous.
 ```
 
+### E.9 Books accuracy drill (after C3, then monthly)
+
+```text
+Using a copy of the demo tenant, plant one example of each error type in concept note 20.5, plus one broken case for each check in the three-way reconciliation (23.3). Plant them through the normal APIs and screens, not by editing the database. Then run the books health checks and the nightly reconciliation.
+Report, for each planted problem: whether it was detected, how it was explained to the user, the suggested fix, and whether applying the fix corrects the books completely (trial balance, sub-ledgers, stock valuation and reconciliation all clean afterwards). Fix any gaps you find, then run the drill again.
+```
+
 ---
 
 ## Part F. Quality gates and invariants
@@ -584,6 +711,7 @@ Add support for [country]. Research the current VAT/GST/sales-tax rules, roundin
 3. `docs/PROGRESS.md` updated, including traceability by process ID; ADRs for new decisions.
 4. Demo seed data updated so the new features can be shown.
 5. No new dependency without a stated reason; no secrets in the repository.
+6. The three-way reconciliation (concept note 23.3) passes on the demo data, and the architecture test confirms no module outside the cores writes journal, stock or balance data.
 
 **Invariants that must be covered by property-based or scenario tests:**
 
@@ -598,6 +726,10 @@ Add support for [country]. Research the current VAT/GST/sales-tax rules, roundin
 | Numbering | Receipt/invoice numbers are unique, and gapless where required. |
 | Permissions | No action above a threshold completes without a recorded approval; no cross-tenant or cross-location data leakage. |
 | Audit | Every sensitive action has an audit event; the audit hash chain verifies. |
+| Core boundaries | Only the Finance, Inventory and Sales cores write journals, stock movements and balances; every other module goes through `postJournal`, `recordStockMovement` or `completeSale`. |
+| Three-way reconciliation | Sales ↔ Finance, Sales ↔ Inventory, Inventory ↔ Finance, Tenders ↔ Finance, Settlements ↔ Bank and Sub-ledgers ↔ GL all agree (concept note 23.3), per day and location. |
+| Books | Every book of original entry and ledger is a view over the one journal store; sub-ledgers equal control accounts; suspense is zero at every closed period; corrections are journals, never edits. |
+| One event, three views | No completed sale exists without its stock movements and journal, and no journal from a sale exists without its sale. |
 | Payments | No card data stored; every authorisation is captured, voided or expired; tips adjust only within provider rules. |
 
 ---
@@ -613,4 +745,94 @@ Add support for [country]. Research the current VAT/GST/sales-tax rules, roundin
 - **For UI, name what to avoid.** A general request like "make it look professional" tends to produce generic styling. Name the specific patterns to avoid (as in E.6) and review screenshots.
 - **Tell it to check live documentation** for any external API (payments, ERPs, delivery platforms, fiscal systems, the Claude API). Those APIs change faster than any model's training data.
 - **Automate the checks.** Configure Claude Code hooks or CI so lint, type-check and tests run automatically after edits. The model then gets immediate feedback.
+- **Build the cores before the screens people see.** Finance and inventory are less visible than the till, but getting them right first is what makes every later report and screen trustworthy. Resist moving the vertical modes ahead of C1–C3.
 - **Review what matters most yourself:** money, tax, permissions, and anything that touches real card terminals or real customer data. Get a qualified accountant to review posting rules and tax, and a security professional to review M14 findings before going live.
+
+---
+
+## Part H. Upgrade path for a build already in progress
+
+Use this part if you have already started building from the earlier version of the concept note (v0.3) and this guide. It re-plans the existing code around the three core pillars, **Finance, then Inventory, then Sales**, without discarding working code.
+
+### H.1 What changed
+
+| Area | Before | Now |
+|---|---|---|
+| Specification | Concept note v0.3 | Concept note **v0.4**: new Sections 19–23 and process IDs F1–F19, IN1–IN11, SA1–SA12. Sections 1–18 and IDs S, B, R and E are unchanged. |
+| Finance | Built late (M10), together with ERP connectors | Built **first** as core C1, with accounting books, ledgers, reconciliations, health checks, error correction, close and an owner view |
+| Inventory | M3 stock engine, with cost kept "for later finance posting" | Core **C2** (replaces M3): perpetual inventory that posts every movement to the books, with GRNI and inventory–finance reconciliation |
+| Sales | Sales model created inside the POS terminal milestone (M4) | Core **C3**: server-side sales core that posts to stock and books, with Z-close, quick reports and insight-to-task. M4 becomes the terminal apps on top of it |
+| Payments (M5) | Settlement matching only | Also posts tenders, tips, settlements, fees and chargebacks through clearing accounts |
+| Purchasing (M6) | Invoices matched; AP "later" | Invoices post to the purchases day book and creditors ledger; GRNI clears on matching |
+| M10 | Finance core + ERP hub | **ERP integration hub only**; it maps the finance core to external ERPs |
+| Rules | `CLAUDE.md` without core rules | `CLAUDE.md` gains the "Core pillars" section (H.2) |
+
+### H.2 Update the repository files
+
+1. Replace `docs/concept-note.md` in your product repository with the new `POS_Concept_Note.md` (v0.4).
+2. Add this section to your existing `CLAUDE.md`, directly after "What we are building":
+
+````markdown
+## Core pillars: Finance → Inventory → Sales (concept note Sections 19–23)
+- Finance, Inventory and Sales are the three core modules, built in that order. Every other module (payments, purchasing, supermarket/bar/resto-bar modes, people, management, reporting, AI, integrations) is built on them.
+- Only the cores write money and stock. Other modules use the core contracts: `postJournal` (Finance), `recordStockMovement` (Inventory) and `completeSale` (Sales). No other module writes journal lines, stock movements or balances directly. An architecture test enforces this.
+- One event, three views: a sale, its stock movements and its journal are committed together (one transaction or an exactly-once outbox). None exists without the others.
+- The books of original entry and ledgers (concept note 20.2) are views over one journal store, not separate copies.
+- Every journal links to a source document. Posted entries are never edited or deleted; corrections go through the correction wizard (reversal, reclassification, amount correction) with reason, approval and audit.
+- A posting that fails is never dropped: it is held in the finance issue inbox and shown as "unposted" until fixed.
+- The three-way reconciliation (23.3) runs nightly and in the test suite. Any failure is a bug or a finance issue, never ignored.
+- Process IDs: F1–F19 (finance), IN1–IN11 (inventory), SA1–SA12 (sales). Reference them in module READMEs and tests.
+````
+
+3. Commit these two changes on a new branch (for example `upgrade/core-pillars`) before running U0.
+
+### H.3 Prompt U0: assess and re-plan (no application code)
+
+Use effort `xhigh`.
+
+```text
+The specification has been upgraded. docs/concept-note.md is now v0.4: Finance, Inventory and Sales are the three core pillars (Sections 19–23), to be built in that order, with new process IDs F1–F19, IN1–IN11 and SA1–SA12. CLAUDE.md has a new "Core pillars" section.
+
+Your task in this session is to assess the existing code against the upgraded specification and re-plan the work. Do not change application code yet.
+
+1. Read CLAUDE.md, docs/concept-note.md (especially Sections 19–23), docs/PROGRESS.md, docs/architecture.md, docs/domain/model.md and all ADRs. Then read the code.
+
+2. Write docs/upgrade/core-pillars-assessment.md containing:
+   - What exists today for finance, inventory and sales (modules, tables, APIs, tests), with file references.
+   - A gap analysis against F1–F19, IN1–IN11, SA1–SA12 and the core contracts in 19.3. For each ID give a status (done / partial / missing / conflicts with the spec) and the evidence.
+   - Boundary violations: every place where code outside the cores writes money, journal or stock data, or calculates totals that should come from the cores.
+   - The data model changes needed and a migration approach for existing data, including backfilling journals and stock values for existing sales and movements, with a reconciliation proof that the backfill is complete and correct.
+   - What to keep as is, what to refactor and what (if anything) to replace, with reasons. Prefer refactoring working code over rewriting it.
+
+3. Update docs/architecture.md and docs/domain/model.md for the three cores and their contracts. Add ADRs for: core boundaries; the posting engine; books as views over one journal store; perpetual inventory valuation; the three-way reconciliation; the migration and backfill approach.
+
+4. Update docs/PROGRESS.md: the new milestone order from the prompt guide (A.3), adapted to where this build actually is; the traceability table extended with the new IDs; and, for work finished under old milestones, what still needs to change.
+
+5. Reply with a short summary: the current state, the plan for C1 → C2 → C3 in this codebase, the main risks, and any product decisions I need to make.
+```
+
+### H.4 Existing-build addendum for C1, C2 and C3
+
+When you run the C1, C2 and C3 prompts on an existing codebase, paste this paragraph directly after the standard opening:
+
+```text
+This codebase already contains work from earlier milestones; see docs/upgrade/core-pillars-assessment.md. Keep what already meets the specification, refactor what partly meets it, and migrate existing data safely: reversible migrations, backfills with a reconciliation proof, and no data loss. Where existing modules write money or stock directly, route them through the core contracts in this milestone and add an architecture test that stops it from happening again. Keep existing features working; run the full existing test suite before and after, and report any behaviour that changed on purpose.
+```
+
+### H.5 What to do depending on where your build is
+
+| Where you are | What to run next |
+|---|---|
+| Prompt 0 and/or M0 done | U0 (short), then M1 → C1 → M2 → C2 → C3 → M4 → … |
+| M1 and/or M2 done | U0, then C1 → C2 → C3 (M2 is kept; C2 builds on it) |
+| Old M3 (inventory engine) done | U0, then C1, then C2 as a **refactor** of M3: add valuation posting, GRNI, movement-to-journal mapping, inventory–finance reconciliation, backfill journals for existing movements |
+| Old M4 (POS terminal) done | U0, C1, C2, then C3: move sale completion from the terminal/server code into completeSale; terminals send sales documents; backfill sales, stock and journals for existing data; keep the offline sync guarantees |
+| M5 and/or M6 done | As above, and in C1–C3 also rewire payments to clearing accounts and purchasing to AP/GRNI (use the addendum) |
+| Old M10 (finance) done | U0 compares the existing finance module with F1–F19; C1 becomes gap-closing: books as views, health checks, correction wizard, close checklist, owner view, reconciliations. M10 continues as the ERP hub only |
+| Vertical modes (M7–M9) done | As above; then run E.1 (Verify) for each mode with a focus on the three-way reconciliation, and fix any mode that bypasses the cores |
+
+### H.6 After the upgrade
+
+- Continue with the remaining milestones in the new order (A.3).
+- Run **E.1 Verify** at the end of C1, C2 and C3, and **E.9 Books accuracy drill** after C3.
+- From now on, every milestone's "Done when" implicitly includes: the three-way reconciliation passes on the demo data, and no module bypasses the core contracts.

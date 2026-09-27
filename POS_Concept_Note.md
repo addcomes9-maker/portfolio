@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Document type** | Concept note (draft for discussion) |
-| **Version** | 0.3: adds management roles, users and usability for each service (Section 7) and the barista / coffee station process (R15). v0.2 added the process-by-process feature design and positioning over existing POS and ERP systems. |
+| **Version** | 0.4: makes **Finance, Inventory and Sales the three core pillars** of the platform (Sections 19–23): built-in accounting books, books health checks and error correction, perpetual inventory posted to the books, and a sales core with quick reports and insight-to-task. Sections 1–18 keep their numbers. v0.3 added management roles, users and usability for each service (Section 7) and the barista / coffee station process (R15). v0.2 added the process-by-process feature design and positioning over existing POS and ERP systems. |
 | **Date** | September 2026 |
 | **Scope** | Point-of-sale (POS) and store-management platform for three verticals: supermarkets / grocery, bars / pubs / lounges, and resto-bars (restaurant + bar hybrids) |
 | **Basis** | (a) How these businesses run each process manually today; (b) the features of POS platforms in wide use (Toast, Square, Lightspeed, Clover, TouchBistro, Revel, Shift4/SkyTab, Oracle MICROS Simphony, NCR Voyix/Aloha, IT Retail, LOC, and bar-inventory tools such as BinWise and BevSpot); (c) the features of ERP systems with POS or retail modules (Odoo, ERPNext, LS Central on Microsoft Dynamics 365 Business Central, Microsoft Dynamics 365 Commerce, SAP, Oracle Retail Xstore). See **Sources**. |
@@ -43,6 +43,11 @@
 16. Risks and mitigation
 17. Success measures
 18. Conclusion and next steps
+19. The three core pillars: Finance, Inventory and Sales
+20. Finance core (F1–F19)
+21. Inventory core (IN1–IN11), working with Finance
+22. Sales core (SA1–SA12), working with Inventory and Finance
+23. How the three cores work together
 - Appendix A: Feature matrix by mode
 - Appendix B: Glossary
 - Sources
@@ -61,7 +66,14 @@ This concept note proposes a **single cloud-native, offline-first POS platform**
 - **Better than ERP POS modules:** fast checkout and service screens, and deep supermarket, bar and resto-bar workflows.
 - **Able to run on top of what the customer already has:** it can run as a complete system, as a front end to an existing ERP, or as an **intelligence and control layer** over an existing POS and ERP (Section 5).
 
-The platform has a shared core (sales, payments, inventory, customers, staff, reporting) and **three vertical modes**: Supermarket, Bar and Resto-bar. A business switches on one or more. Section 6 designs every major business process in detail: how it is done manually today, what existing POS and ERP systems provide, where the gaps are, and the specific features this platform will provide. Section 7 designs the system around **the people who manage and use it**: owners, store, bar and restaurant managers, supervisors, cashiers, bartenders, baristas, servers, chefs, storekeepers and accountants. It covers role-specific screens, permissions, approval limits, daily management routines, and usability in each working environment, from a dark, noisy bar to a hot kitchen or a busy checkout lane.
+At the heart of the platform are **three core pillars, built in this order: Finance, Inventory and Sales** (Sections 19–23).
+- **Finance** keeps the standard accounting books (cash book, bank book, petty cash, day books, ledgers, registers). It tracks income and expenses, and it runs daily health checks that find and help correct financial errors.
+- **Inventory** records every stock movement with quantity and value and posts it to the books.
+- **Sales** turns every sale into correct stock and correct books, and into quick reports and simple tasks for owners and managers.
+
+The three cores reconcile with each other every day, so the financial figures shown are always backed by stock and sales records.
+
+Around the cores, the platform has shared modules (payments, customers, staff, reporting) and **three vertical modes**: Supermarket, Bar and Resto-bar. A business switches on one or more. Section 6 designs every major business process in detail: how it is done manually today, what existing POS and ERP systems provide, where the gaps are, and the specific features this platform will provide. Section 7 designs the system around **the people who manage and use it**: owners, store, bar and restaurant managers, supervisors, cashiers, bartenders, baristas, servers, chefs, storekeepers and accountants. It covers role-specific screens, permissions, approval limits, daily management routines, and usability in each working environment, from a dark, noisy bar to a hot kitchen or a busy checkout lane.
 
 **Expected benefits** (targets to validate in the pilot):
 
@@ -152,6 +164,7 @@ The platform has a shared core (sales, payments, inventory, customers, staff, re
 | O6 | Resilience | Zero lost sales during internet outages (offline mode) |
 | O7 | Compliance | PCI DSS v4.0 aligned; local tax/fiscal rules met from day one |
 | O8 | Adoption | New cashier or bartender productive after 1 hour or less of training |
+| O9 | Books always correct | Sales, inventory and finance reconcile daily with zero unexplained differences; every detected finance issue has an owner and a suggested fix; month-end close in 2 days or less |
 
 ---
 
@@ -617,6 +630,8 @@ This process also applies to bars that serve coffee and to supermarkets with an 
 
 ### 6.4 Shared back-office and ERP processes
 
+> From v0.4, these back-office processes are specified in full by the **Finance core (Section 20)**. E1–E9 remain valid as summaries and map to F-IDs: E1 → F2/F3; E2 → F11; E3 → F10; E4 → F8; E5 → F13; E6 → F17/F18; E7 → F1; E8 → F15/F19; E9 → F1/F17.
+
 These processes are where ERP systems are strongest and POS systems weakest. The platform either performs them natively (Mode 1) or feeds the customer's ERP (Modes 2 and 3).
 
 | # | Process | Manual today | Existing POS | Existing ERP | Our features |
@@ -849,6 +864,8 @@ Each workplace has different physical conditions, so screens and devices are des
 
 ### 8.3 Core modules (shared by all modes)
 
+**Finance, Inventory and Sales are the three core pillars;** Sections 19–23 define them in detail and they take precedence over the summaries below. All other modules use the core service contracts (19.3).
+
 | Module | Key capabilities |
 |---|---|
 | **Sales & checkout** | Barcode/PLU/search/quick keys; modifiers and variants; discounts with approval rules; returns and exchanges; split tender (cash, card, mobile money, voucher, account); receipts printed, emailed, SMS/WhatsApp or QR |
@@ -1051,6 +1068,7 @@ For customers starting in **Mode 3**, Phase 1 is shorter (connectors and dashboa
 | Waste | Perishable and kitchen waste value | Measure → −15% |
 | Availability | Out-of-stock incidents | Measure → −25% |
 | Integration | ERP postings completed without manual correction | → ≥ 99% |
+| Books accuracy | Daily three-way reconciliation (Section 23.3) passing; open finance issues older than 7 days; days to close the month | → 100% passing; 0 issues older than 7 days; close in ≤ 2 days |
 | Admin time | Hours per week on manual entry, reconciliation and reports | Measure → −50% |
 | Uptime | Sales lost to downtime | → 0 |
 | Usability | System Usability Scale (SUS) by role; time to productivity for new staff; task error rate | → SUS ≥ 75; ≤ 1 hour to productivity |
@@ -1066,11 +1084,369 @@ The platform combines what cloud POS products do best (speed, simplicity, paymen
 
 **Proposed next steps**
 
-1. Confirm the target businesses: number of sites, lanes and terminals, country or countries of operation, and **the POS and ERP systems they use today**.
-2. Validate Sections 6 and 7 with operators: walk through each process and each role with a store manager, department manager, head cashier, bar manager, bartender, barista, floor manager and chef, and rank features as *must*, *should* or *later*.
-3. Decide the delivery route: build a custom platform, build on an open-source base (for example, Odoo or ERPNext), or extend an existing product. A short build-versus-buy analysis is recommended.
-4. Choose the first deployment mode for the pilot and the priority connectors.
-5. Shortlist hardware and payment partners; approve pilot budget and timeline.
+1. Build the three cores first, in order: **Finance, then Inventory, then Sales** (Section 23.5), before the vertical modes.
+2. Confirm the target businesses: number of sites, lanes and terminals, country or countries of operation, and **the POS and ERP systems they use today**.
+3. Validate Sections 6 and 7 with operators: walk through each process and each role with a store manager, department manager, head cashier, bar manager, bartender, barista, floor manager and chef, and rank features as *must*, *should* or *later*.
+4. Decide the delivery route: build a custom platform, build on an open-source base (for example, Odoo or ERPNext), or extend an existing product. A short build-versus-buy analysis is recommended.
+5. Choose the first deployment mode for the pilot and the priority connectors.
+6. Shortlist hardware and payment partners; approve pilot budget and timeline.
+
+---
+
+## 19. The three core pillars: Finance, Inventory and Sales
+
+> **Why this section was added (v0.4).** Sections 1–18 describe what the platform does for each type of business. Sections 19–23 define its **core**: Finance, Inventory and Sales. Every supermarket, bar, resto-bar and café feature is built on these three. Section numbers 1–18 and process IDs S, B, R and E are unchanged, so references in a build already under way stay valid. New process IDs are **F** (finance), **IN** (inventory) and **SA** (sales).
+
+### 19.1 The principle: one event, three views, one truth
+
+Every business event touches all three cores at once. A sale, delivery, return, waste entry or stock count is recorded as **one source document**. From that document the platform produces three consistent records:
+
+| Core | What it records from the event | Question it answers |
+|---|---|---|
+| **Sales** | What was sold, to whom, at what price, how it was paid | "What did we sell and how were we paid?" |
+| **Inventory** | What stock moved, where from, and at what cost | "What do we have, where, and what is it worth?" |
+| **Finance** | The balanced double-entry postings: revenue, tax, cost of goods sold (COGS), cash, bank, receivables, payables | "Did we make money, what do we own and owe, and are the books right?" |
+
+The three records are created together, in one database transaction or through a guaranteed outbox. None of them can exist without the others, and the platform checks every day that they still agree (Section 23.3).
+
+### 19.2 Why Finance comes first
+
+- **Finance is the reference that everything else must match.** If the ledger design is right from the start (chart of accounts, posting rules, periods, audit), inventory and sales plug into it cleanly. If finance is added last, it inherits every shortcut the other modules took, and the books never fully tie out. This is a common weakness of POS systems that bolt on accounting later.
+- **Inventory comes second** because for supermarkets and bars it is the largest asset on the balance sheet and the source of COGS. It is where most financial errors start (unrecorded waste, count differences, wrong costs).
+- **Sales comes third** because it is the highest-volume event and depends on both. Each sale needs stock and cost from inventory, and tax, tender and revenue accounts from finance.
+- **Everything else is built on the three cores.** Supermarket, bar and resto-bar modes, payments, purchasing, people, reporting and AI never write money or stock records directly. They call the core services, so no module can bypass the controls.
+
+### 19.3 Core architecture
+
+```
+          ┌───────────────────────────────────────────────────────────────┐
+          │           VERTICAL MODES & SUPPORTING MODULES                  │
+          │  Supermarket · Bar · Resto-bar/Café · Payments · Purchasing    │
+          │  People & permissions · Management · Reporting · AI · Integr.  │
+          └──────────────┬──────────────────┬──────────────────┬──────────┘
+                         │ sales documents  │ stock movements  │ postings (only via cores)
+          ┌──────────────▼──────┐   ┌───────▼────────────┐   ┌─▼──────────────────────┐
+          │    SALES CORE (SA)   │──►│ INVENTORY CORE (IN)│──►│   FINANCE CORE (F)      │
+          │ orders, receipts,    │   │ stock ledger,      │   │ posting engine, books,  │
+          │ invoices, returns,   │   │ valuation, counts, │   │ ledgers, reconciliation,│
+          │ tenders, Z-close     │   │ GRNI, variance     │   │ health checks, close    │
+          └──────────┬───────────┘   └─────────┬──────────┘   └───────────▲────────────┘
+                     └────────── revenue, tax, tenders, tips, deposits ──┘
+                                          ▲
+                           Daily three-way reconciliation (Section 23.3)
+```
+
+**Core service contracts** (the only way other modules touch money or stock):
+
+| Contract | Owned by | Used by | Guarantees |
+|---|---|---|---|
+| `postJournal(sourceDocument, lines)` | Finance | Inventory, Sales, Purchasing, Payments, People | Balanced, dated in an open period, linked to its source document, idempotent, audited |
+| `recordStockMovement(sourceDocument, movements)` | Inventory | Sales, Purchasing, Production, Counts | Quantity and value recorded; matching journal posted through Finance |
+| `completeSale(salesDocument)` | Sales | POS terminals, online, delivery, QR, self-checkout | Stock depleted through Inventory; revenue, tax, tenders and COGS posted through Finance |
+
+---
+
+## 20. Finance core (F1–F19)
+
+The finance core gives clients **full accounting** (the books their accountants already know) and tools to **find and correct financial errors**. It gives owners who aren't accountants a simple view of **income and expenses**.
+
+### 20.1 Accounting foundations
+
+- **Double-entry accounting** with journals that are balanced by construction; accrual basis, with a cash-basis reporting view for small businesses that file on a cash basis.
+- **Chart of accounts templates** for each business type (supermarket, bar, resto-bar, café, mixed), adaptable to local standards (for example, IFRS for SMEs or the national chart where required). Accounts are grouped by class: assets, liabilities, equity, income, expenses.
+- **Dimensions** on every posting: legal entity, location, department (grocery, fresh, bar, kitchen, café), cost centre and event. So a P&L can be produced for any slice of the business without separate books.
+- **Fiscal years and periods**, multi-entity, multi-currency with exchange-rate revaluation.
+- **Source-document rule:** every entry links to a source document (receipt, invoice, credit note, bank line, voucher, count sheet, journal voucher with attachment).
+
+### 20.2 The accountants' books, built in
+
+The platform keeps the standard **books of original entry** (day books) and **ledgers** that accountants and bookkeepers use. They are filled automatically from daily operations, and each can be viewed, printed and exported in the familiar layout: date, reference, particulars, debit, credit and running balance, with drill-down to the source document.
+
+**Books of original entry (day books)**
+
+| Book | What it records | Filled automatically from |
+|---|---|---|
+| **Cash book** | All cash received and paid, per till, safe and cash account; cash and bank columns view available | POS cash sales, cash refunds, paid-ins/paid-outs, cash drops, safe movements, bank deposits |
+| **Bank book** | All receipts and payments through each bank account | Card and mobile-money settlements, supplier payments, bank deposits, bank fees, imported bank statement lines |
+| **Petty cash book** | Small cash expenses, on the imprest system (float topped up to a fixed amount), with analysis columns by expense type | Petty cash vouchers with photo of the receipt, approved by a manager |
+| **Daily sales book (POS sales summary)** | Each business day's sales by department, tax rate and tender | Z-close of every terminal (SA8) |
+| **Sales day book** | Credit sales invoices (B2B customers, customer accounts, event invoices) | Credit invoices (SA5) |
+| **Sales returns day book** (returns inward) | Credit notes issued to customers | Refunds and returns (SA4) |
+| **Purchases day book** | Supplier invoices for goods and services | Supplier invoices after three-way match (S3, E3) |
+| **Purchases returns day book** (returns outward) | Debit notes and supplier credits | Returns to vendor, short/damaged delivery claims (S3, S8) |
+| **Expense book** | Non-stock expenses: rent, utilities, wages, repairs, marketing, licences, fees | Expense entries and bills (F5), payroll (F13), card fees (SA2) |
+| **Other income register** | Income that isn't from sales: supplier rebates, commissions, event hire, rent received, interest | Income entries (F5), vendor-funded promotion claims (S4) |
+| **General journal** | Everything else: opening balances, corrections, accruals and prepayments, depreciation, year-end adjustments | Journal vouchers (F15 correction wizard, F16 close) |
+
+**Ledgers and registers**
+
+| Ledger / register | Purpose | Control check |
+|---|---|---|
+| **General (nominal) ledger** | Every account, with balances by period and dimension | Trial balance always balances |
+| **Debtors (sales) ledger** | One account per customer: invoices, receipts, credit notes | Sum of customer balances = debtors control account |
+| **Creditors (purchases) ledger** | One account per supplier: invoices, payments, debit notes | Sum of supplier balances = creditors control account |
+| **Stock ledger / valuation** | Quantity and value per item and location (from Inventory core) | Stock valuation = inventory accounts in the GL (IN10) |
+| **Fixed asset register** | Equipment (fridges, coffee machines, POS hardware, furniture, vehicles), cost and depreciation | Register total = fixed asset accounts |
+| **Payroll register / wages book** | Gross pay, deductions, net pay, employer costs per person and period | Payroll liabilities = wage control accounts |
+| **Tax register (VAT / GST / sales tax)** | Output tax on sales, input tax on purchases, adjustments | Register = tax control accounts; basis of tax returns |
+| **Tips and service charge ledger** | Tips and service charge collected and paid out, per person | Liability account = unpaid tips |
+| **Deposits, gift cards and vouchers ledger** | Customer deposits, reservation deposits, container deposits, gift card and voucher balances | Liability accounts = outstanding balances |
+| **Capital, loans and drawings** | Owner's capital, loans and repayments, drawings | Balances agree with loan statements |
+
+### 20.3 Income and expense tracking for owners (F5)
+
+Many owners are not accountants. The finance core offers a **simple view** alongside the full accountant view:
+
+- **Money in / money out** by category (sales, other income; stock purchases, wages, rent, utilities, repairs, marketing, fees) for today, this week, this month and this year, in plain language.
+- **Expense capture from a phone:** photograph a receipt or bill; the system reads the supplier, date, amount and tax (OCR) and suggests the category. A manager approves, and it posts to the expense book.
+- **Recurring expenses and bills** (rent, subscriptions, loan repayments) with due-date reminders.
+- **Cash position:** cash in tills, safes and banks; money owed to the business and by it; a simple 30/60/90-day cash forecast.
+- **Budget vs actual** per category, with alerts when spending runs ahead of budget.
+- Every simple-view number drills down to the accountant view and the source documents, so the two views always agree.
+
+### 20.4 Reconciliations (F8)
+
+| Reconciliation | What is matched | Frequency |
+|---|---|---|
+| **Bank** | Bank statement lines (feed or file import) against the bank book, with auto-match rules and suggested matches | Daily |
+| **Cash** | Till counts, safe counts and bank deposits against the cash book | Every shift / daily |
+| **Card and mobile money** | Provider settlements, fees and chargebacks against card/mobile-money clearing accounts (SA2) | Daily |
+| **Debtors and creditors control** | Subsidiary ledgers against control accounts; customer and supplier statements against our records | Monthly (continuous check daily) |
+| **Inventory** | Stock valuation against inventory accounts; GRNI (goods received not invoiced) listing against the GRNI account | Daily |
+| **Tax** | Tax register against tax control accounts and tax return | Per return period |
+| **Liabilities** | Tips, gift cards, deposits against their liability accounts | Weekly |
+| **Inter-company** | Balances between legal entities of the same group | Monthly |
+
+### 20.5 Finding and correcting financial errors (F15)
+
+This is the main promise to clients: **the system helps them find and fix finance problems, not just record transactions.**
+
+**1. Prevention (errors stopped at entry)**
+- Journals must balance; posting to closed periods is blocked; mandatory source documents and reasons.
+- Duplicate detection (for example, the same supplier invoice number twice, or the same bank line matched twice).
+- Account-class rules: for example, a purchase above the capitalisation threshold is flagged as a possible fixed asset; stock purchases can only post to inventory or GRNI.
+- Three-way match for supplier invoices; approval thresholds and segregation of duties (Section 7.5).
+
+**2. Detection: automatic "books health checks"**
+
+A trial balance only catches errors that make debits and credits unequal. Many errors don't do that, so the platform runs daily checks aimed at each type of error:
+
+| Error type | What it means | How the platform detects it |
+|---|---|---|
+| **Omission** | A transaction was never recorded | Goods received with no supplier invoice after X days; a trading day with no Z-close posting; a bank line with no match; a recurring bill not entered; a card settlement with no matching sales |
+| **Commission** | Right type of account, wrong one (for example, wrong customer or supplier) | Supplier and customer statement reconciliation; payment matched to an invoice of another party; unusual balance direction (a debit balance on a supplier) |
+| **Principle** | Wrong class of account (for example, an asset expensed or an expense capitalised) | Account-class rules; amount thresholds; items and suppliers mapped to expected accounts; review list of unusual account choices |
+| **Original entry** | Wrong amount entered at source | Three-way match differences; invoice vs PO price; OCR amount vs keyed amount; tax that doesn't match the rate |
+| **Reversal** | Debit and credit swapped | Balance direction checks per account type; comparison with the same entry pattern in history |
+| **Compensating** | Two errors that cancel each other | Reconciliation at detail level (sub-ledgers, bank, stock) rather than only at totals |
+| **Transposition** | Digits swapped (for example, 540 entered as 450) | When a reconciliation difference is divisible by 9, the system flags a likely transposition and lists candidate entries |
+| **Duplication** | Same transaction entered twice | Same party, amount, date and reference within a window |
+| **Cut-off** | Entry in the wrong period | Goods received before period end but invoiced after → suggested accrual (GRNI); prepaid expenses → suggested prepayment |
+| **Unbalanced or unexplained differences** | Differences between sub-ledger and GL, cash over/short, stock valuation gaps | Daily reconciliation differences, with age and owner |
+| **Suspense items** | Entries parked in a suspense account | Suspense ageing report; suspense must be zero before a period can close |
+
+**3. Correction: a guided wizard that never edits history**
+- Posted entries are never edited or deleted. The accountant selects the wrong entry, chooses the kind of correction (reverse and re-enter, reclassify to another account, correct the amount, or move to another period), and the system generates the correcting journal. That journal carries the reason, a link to the original and any attachment.
+- Corrections above a threshold need approval (for example, a finance manager or the owner).
+- If the original period is closed, the correction posts in the current period with a reference. Reopening a period requires two approvals and is logged.
+- An **issue inbox** for the bookkeeper and accountant lists every detected problem with severity, the suggested fix and one-click apply (with approval), and shows when each issue was resolved.
+- A **"what changed" report** shows every correction in a period for owners and auditors.
+
+### 20.6 Period and year-end close (F16)
+
+A guided close checklist: reconciliations complete; suspense cleared; health-check issues resolved or accepted with reason; accruals and prepayments; depreciation run; stock count adjustments posted; payroll and tips posted; tax computed. Then the period is locked. Year-end closes income and expense to retained earnings and opens the new year with carried-forward balances.
+
+### 20.7 Financial statements and reports (F17)
+
+Trial balance; profit and loss (by location, department and period); balance sheet; cash-flow statement; statement of changes in equity; aged debtors and creditors; tax return support; departmental and daily flash P&L; budget vs actual; prime cost. All are exportable to Excel and PDF. An **accountant pack** (all of the above plus ledgers and reconciliations for the period) can be generated in one click for the external accountant or auditor.
+
+### 20.8 Finance process IDs
+
+| ID | Capability | Key features |
+|---|---|---|
+| **F1** | Setup | Chart of accounts templates, dimensions, fiscal years and periods, entities, currencies, opening balances import |
+| **F2** | Posting engine | Balanced, idempotent, source-linked postings; posting rules configurable per business; no direct postings bypassing rules |
+| **F3** | Books of original entry | Cash book, bank book, petty cash book, daily sales book, sales/purchases day books and returns books, expense book, other income register, general journal |
+| **F4** | Ledgers | General ledger, debtors ledger, creditors ledger, control accounts |
+| **F5** | Income and expense tracking | Simple owner view, phone receipt capture with OCR, recurring bills, categories, budget alerts |
+| **F6** | Petty cash | Imprest floats, vouchers with photos, approval, top-up |
+| **F7** | Bank and cash management | Bank accounts, statement import and feeds, deposits, transfers, safes |
+| **F8** | Reconciliations | Bank, cash, card/mobile money, control accounts, inventory, tax, liabilities, inter-company |
+| **F9** | Accounts receivable | Customer invoices, receipts, credit control, statements, ageing, reminders |
+| **F10** | Accounts payable | Supplier invoices, payment runs, supplier statements, ageing |
+| **F11** | Tax | Tax engine, tax register, return preparation, fiscal/e-invoicing connectors |
+| **F12** | Fixed assets | Asset register, depreciation methods, disposals |
+| **F13** | Payroll and tips posting | Payroll journals from time clock and payroll provider; tips and service charge liabilities |
+| **F14** | Customer liabilities | Deposits, gift cards, vouchers, container deposits |
+| **F15** | Books health and error correction | Daily health checks, issue inbox, correction wizard, suspense control, "what changed" report |
+| **F16** | Period and year-end close | Close checklist, locks, controlled reopening, year-end roll-forward |
+| **F17** | Financial statements and reports | TB, P&L, balance sheet, cash flow, equity, ageing, tax, departmental and flash P&L, accountant pack |
+| **F18** | Budgets and cash forecast | Budgets by account and dimension, budget vs actual, cash-flow forecast |
+| **F19** | Accountant collaboration | Roles for bookkeeper, accountant, finance manager, external accountant/auditor (read-only); comments and document requests on entries |
+
+---
+
+## 21. Inventory core (IN1–IN11), working with Finance
+
+Inventory is **perpetual**: every stock movement records both **quantity and value** and immediately posts the matching journal through the Finance core. The stock ledger and the general ledger therefore always agree. If they ever don't, the difference appears in the books health checks.
+
+### 21.1 How each stock movement posts to the books
+
+| Stock movement | Inventory effect | Journal posted by the Finance core |
+|---|---|---|
+| Goods received (before supplier invoice) | + quantity, + value at PO cost | Dr Inventory · Cr GRNI (goods received not invoiced) |
+| Supplier invoice matched | Cost adjusted if invoice price differs (within tolerance) | Dr GRNI, Dr Input tax · Cr Supplier (creditors); price difference to Inventory or purchase price variance |
+| Sale (by recipe for drinks and dishes) | − quantity at current cost | Dr COGS (by department) · Cr Inventory |
+| Customer return to stock | + quantity at original cost | Dr Inventory · Cr COGS |
+| Return to supplier | − quantity | Dr Supplier (debit note) · Cr Inventory |
+| Transfer between locations | − at source, + at destination (via in-transit) | Dr Inventory in transit · Cr Inventory (source); then Dr Inventory (destination) · Cr Inventory in transit |
+| Production (bakery, prep, cocktails batched) | − ingredients, + finished item | Dr Inventory (finished) · Cr Inventory (ingredients); yield differences to production variance |
+| Waste / spoilage | − quantity | Dr Waste expense (by reason) · Cr Inventory |
+| Comps, spills, staff drinks | − quantity | Dr Comps / Staff welfare / Marketing (by reason) · Cr Inventory |
+| Count variance (shrink or gain) | ± quantity | Dr Shrinkage expense · Cr Inventory (or the reverse for a gain) |
+| Revaluation (cost correction) | ± value only | Dr/Cr Inventory · Cr/Dr Inventory revaluation |
+| Container deposits (kegs, crates) | Container ledger | Dr Deposits receivable · Cr Supplier (and reverse on return) |
+
+### 21.2 Valuation and costing
+- Weighted average cost (default) or FIFO per tenant; landed costs (freight, duties) added to item cost.
+- Recipe cost rolls up from ingredient costs, so every drink and dish has a live cost and margin.
+- Negative stock (selling before a delivery is recorded) is allowed only where configured. When the delivery arrives, the cost is corrected automatically with a revaluation entry.
+
+### 21.3 Inventory process IDs
+
+| ID | Capability | Links |
+|---|---|---|
+| **IN1** | Item, unit and pack master (catalogue) | S1, B4, R9 |
+| **IN2** | Stock ledger and stock locations | S15, B1 |
+| **IN3** | Valuation and costing (average, FIFO, landed cost, recipe cost) | F2 |
+| **IN4** | Receiving and GRNI accrual | S3, F10 |
+| **IN5** | Transfers and in-transit stock | S15, B1 |
+| **IN6** | Recipes, production and yield | S7, B4, R9, R10, R15 |
+| **IN7** | Counts and variance posted to the books | S11, B5 |
+| **IN8** | Waste, comps, spills, staff consumption and shrink classification | S12, B6, R11 |
+| **IN9** | Batch, lot and expiry | S12 |
+| **IN10** | Inventory–finance reconciliation (stock valuation = GL inventory; GRNI listing = GRNI account) | F8, F15 |
+| **IN11** | Inventory insights: stock value, days of cover, stock turn, dead stock, reorder needs, variance hot spots | S2, B5 |
+
+---
+
+## 22. Sales core (SA1–SA12), working with Inventory and Finance
+
+The Sales core turns every sale into correct stock and correct books automatically. It also turns the combined data into **quick reports and simple tasks** that owners and managers can act on.
+
+### 22.1 What happens when a sale completes
+
+1. **Sales record:** the sales document (receipt, tab, table bill, credit invoice, online or delivery order) is finalised with lines, modifiers, discounts, tax, tenders, tips and customer.
+2. **Inventory:** each line depletes stock through its recipe (IN6) at current cost (IN3).
+3. **Finance:** the posting engine (F2) records:
+   - Revenue by department and category; output tax by rate.
+   - Tenders to **clearing accounts** (cash to till, card to card clearing, mobile money to mobile-money clearing, account sales to debtors, gift cards and deposits to their liability accounts).
+   - Discounts, as a reduction of revenue or as a promotion expense, by policy; vendor-funded amounts to a supplier claim receivable.
+   - Tips and service charges to liability accounts.
+   - COGS against inventory.
+4. **Settlement:** when the card provider pays out, the clearing account is cleared to the bank, with fees posted to card-fee expense (F8). Cash moves from till to safe to bank through the cash book.
+
+### 22.2 Quick reports (answers in one tap)
+
+Reports use plain-language names, and each one opens from the home screen of the roles that need it (Section 7).
+
+| Quick report | Answers | For |
+|---|---|---|
+| **Today at a glance** | Sales, profit estimate, customers/covers, average sale, compared with the same day last week | Owner, managers |
+| **What sold and what made money** | Best sellers by quantity and by margin; slow sellers | Owner, buyers, bar manager, chef |
+| **How we were paid** | Payment mix, card fees, cash expected vs counted | Managers, accountant |
+| **Profit this week / month** | Simple P&L (sales − cost of sales − expenses) | Owner |
+| **Cash position** | Cash in tills, safe and bank; what's coming in and going out | Owner, accountant |
+| **Who owes us / whom we owe** | Aged debtors and creditors | Owner, accountant |
+| **Stock value and stock to order** | Stock on hand at cost, low stock, suggested orders | Managers, buyers |
+| **Waste, variance and loss** | Waste, comps, shrink and liquor variance in money | Owner, bar manager, store manager |
+| **Tax due** | Tax collected minus tax paid for the period | Owner, accountant |
+| **Staff performance** | Sales per hour, voids, discounts, tips by person | Managers |
+
+### 22.3 From insight to task
+
+Reports are only useful if someone acts on them. The Sales core feeds an **insight-to-task engine** that turns findings from all three cores into short, assignable tasks with the data attached. For example:
+- "Order 14 items that will run out before the next delivery" (Inventory + Sales forecast).
+- "3 card batches from Tuesday not yet settled" (Finance reconciliation).
+- "Vodka variance 9% this week at Bar 2: recount and review comps" (Inventory + Sales).
+- "Supplier invoice INV-2231 is 6% above PO price: approve or claim" (Finance + Inventory).
+- "Lunch sales down 18% vs last month: review menu prices of 5 low-margin dishes" (Sales + Finance).
+
+Tasks go to the right role (Section 7.6), carry a due time, and close automatically when the underlying issue is resolved.
+
+### 22.4 Sales process IDs
+
+| ID | Capability | Links |
+|---|---|---|
+| **SA1** | Sales document model (receipt, tab, table bill, credit invoice, online, delivery, QR, self-checkout) | S5, B3, R7 |
+| **SA2** | Tenders and clearing accounts (cash, card, mobile money, account, gift card, deposit) | F7, F8 |
+| **SA3** | Discounts and promotions accounting (including vendor-funded claims) | S4, F2 |
+| **SA4** | Returns, refunds and credit notes | S8, F3 |
+| **SA5** | Credit sales and customer accounts | S13, F9 |
+| **SA6** | Deposits, gift cards and vouchers | B10, R1, F14 |
+| **SA7** | Tips and service charges | B8, F13 |
+| **SA8** | Daily sales close (Z) posted to the daily sales book | S10, B13, R14, F3 |
+| **SA9** | Real-time margin per line, sale, category and shift | IN3 |
+| **SA10** | Quick reports (22.2) | Section 12 |
+| **SA11** | Insight-to-task engine (22.3) | Section 7.6 |
+| **SA12** | Channel sales (online, delivery platforms with commissions, QR, kiosk) | S14, R8 |
+
+---
+
+## 23. How the three cores work together
+
+### 23.1 Worked example: a gin and tonic on a bar tab, paid by card
+
+Assumptions: price 11.50 including 20% VAT; gin cost 1.60 (50 ml), tonic cost 0.50; tip 1.00; card fee 3%.
+
+| Step | Sales core | Inventory core | Finance core (journal) |
+|---|---|---|---|
+| Drink rung on the tab | Tab line: G&T 11.50 | — (depleted when the tab is paid, or immediately if configured) | — |
+| Tab paid by card with tip | Receipt: 11.50 + tip 1.00 = 12.50 card | Gin −50 ml (1.60), tonic −1 (0.50) | Dr Card clearing 12.50 · Cr Beverage sales 9.58 · Cr VAT output 1.92 · Cr Tips payable 1.00 |
+| | | | Dr COGS beverage 2.10 · Cr Inventory 2.10 |
+| Next day: card settlement | — | — | Dr Bank 12.12 · Dr Card fees 0.38 · Cr Card clearing 12.50 |
+| Tips paid out with payroll | — | — | Dr Tips payable 1.00 · Cr Payroll/cash 1.00 |
+
+Result: the bar sees the sale and its margin (9.58 − 2.10 = 7.48) immediately; the stock ledger and the GL both show 2.10 less inventory; the card clearing account returns to zero when the provider settles; the tip is a liability until paid out.
+
+### 23.2 Worked example: a supermarket delivery
+
+| Step | Inventory core | Finance core (journal) |
+|---|---|---|
+| Delivery received against PO (100 cases at 10.00) | +100 cases, value 1,000.00 | Dr Inventory 1,000.00 · Cr GRNI 1,000.00 |
+| 2 cases damaged, returned on the spot | −2 cases, debit note raised | Dr GRNI 20.00 · Cr Inventory 20.00 |
+| Supplier invoice arrives: 98 cases, 980.00 + 20% VAT | — | Dr GRNI 980.00 · Dr VAT input 196.00 · Cr Supplier 1,176.00 |
+| Supplier paid | — | Dr Supplier 1,176.00 · Cr Bank 1,176.00 |
+
+If the invoice doesn't arrive by period end, the GRNI balance remains as a correct accrual, and a health check (F15, omission) reminds the accountant to chase it.
+
+### 23.3 Daily three-way reconciliation
+
+Every night (and on demand), the platform proves that the three cores agree. Any failure becomes an item in the finance issue inbox (F15) and a task for the right role (SA11).
+
+| Check | Must be equal |
+|---|---|
+| Sales ↔ Finance | Net sales + tax + tips + deposits in the Sales core = the related revenue, tax and liability postings in the GL, per day and location |
+| Sales ↔ Inventory | Recipe depletion from completed sales = sale movements in the stock ledger |
+| Inventory ↔ Finance | Stock valuation = inventory accounts in the GL; GRNI listing = GRNI account; COGS in the stock ledger = COGS in the GL |
+| Tenders ↔ Finance | Tender totals from Z-closes = movements in cash, card and mobile-money clearing accounts |
+| Settlements ↔ Bank | Provider settlements = bank lines; clearing accounts return to zero within the expected settlement delay |
+| Sub-ledgers ↔ GL | Debtors, creditors, tips, gift cards and deposits = their control accounts |
+
+### 23.4 Consistency guarantees
+
+- A sale, stock movement and journal are committed together, or through an outbox that guarantees delivery exactly once.
+- A posting can never be silently dropped. If a posting rule fails (for example, an unmapped tax code), the document is held in the issue inbox and the owner is alerted, and the books show a clearly labelled "unposted" amount until it's fixed.
+- The books are never more than a few minutes behind trading when online. Offline terminals catch up on reconnection, and the gap is visible.
+
+### 23.5 Build order
+
+1. **Finance core (F1–F19)**, including posting engine, books, ledgers, reconciliations, health checks and close.
+2. **Inventory core (IN1–IN11)**, wired to Finance: every movement posts; IN10 reconciliation passes.
+3. **Sales core (SA1–SA12)**, wired to both: every sale depletes stock and posts; the three-way reconciliation passes; quick reports and insight-to-task work.
+4. Then the POS terminal apps, payments, purchasing and the supermarket, bar and resto-bar modes, all on top of the cores.
+
+For a build already under way, the implementation prompt guide (Part H) contains an **upgrade path** that re-plans the existing code around these three cores without discarding working code.
 
 ---
 
@@ -1078,6 +1454,9 @@ The platform combines what cloud POS products do best (speed, simplicity, paymen
 
 | Feature | Core | Supermarket | Bar | Resto-bar |
 |---|:---:|:---:|:---:|:---:|
+| **Finance core: books, ledgers, reconciliations, health checks, close (F1–F19)** | ● | ● | ● | ● |
+| **Inventory core: perpetual stock posted to the books (IN1–IN11)** | ● | ● | ● | ● |
+| **Sales core: sales posted to stock and books, quick reports, insight-to-task (SA1–SA12)** | ● | ● | ● | ● |
 | Cloud back office + offline terminals | ● | ● | ● | ● |
 | Integrated payments, SoftPOS | ● | ● | ● | ● |
 | Inventory with multi-UoM, recipes, batch/expiry | ● | ● | ● | ● |
@@ -1122,7 +1501,11 @@ The platform combines what cloud POS products do best (speed, simplicity, paymen
 - **BDS / KDS:** Bar / Kitchen Display System; screens that replace paper order tickets.
 - **Barback:** Bar assistant who restocks, changes kegs and clears glasses.
 - **Barista:** Staff member who prepares espresso-based and other coffee drinks.
+- **Books of original entry (day books):** Books where transactions are first recorded from source documents before being posted to the ledger (cash book, sales day book, purchases day book, returns books, general journal).
 - **BoM:** Bill of materials; the list of ingredients or components in a product (a recipe, in hospitality).
+- **Clearing account:** A temporary account that holds money between two events, such as a card sale and the provider's settlement to the bank.
+- **Control account:** A general-ledger account whose balance must equal the total of a subsidiary ledger (for example, debtors control = sum of customer balances).
+- **COGS:** Cost of goods sold.
 - **DSD:** Direct store delivery; suppliers who deliver straight to the store rather than via a warehouse.
 - **DSR:** Daily sales report.
 - **E2EE / P2PE:** End-to-end / point-to-point encryption; card data is encrypted inside the payment terminal.
@@ -1130,17 +1513,23 @@ The platform combines what cloud POS products do best (speed, simplicity, paymen
 - **ESL:** Electronic shelf label; a digital price tag updated from the POS.
 - **Expeditor (expo):** Person, or screen, that coordinates finished food and drinks so a table's order leaves together.
 - **FEFO / FIFO:** First-expired-first-out / first-in-first-out stock rotation.
+- **GRNI:** Goods received not invoiced; a liability recorded when stock arrives before the supplier's invoice.
 - **GRN:** Goods received note.
 - **GTIN:** Global Trade Item Number; the number behind a product barcode.
+- **Imprest system:** A petty cash method where the float is topped up to a fixed amount after spending.
+- **Perpetual inventory:** Stock records updated with quantity and value at every movement, instead of only at periodic counts.
 - **PLU:** Price look-up code, used for produce and weighted items.
 - **PMS:** Hotel property management system.
 - **Pour cost:** Cost of the liquor in a drink ÷ its selling price.
 - **Pre-authorisation:** A temporary hold on a card when a tab is opened.
 - **Remote approval:** A manager approves a staff request (void, refund, discount) on their phone instead of entering a PIN at the terminal.
 - **Role template:** A predefined set of screens and permissions for a job role, adjustable per person.
+- **Posting engine:** The component that turns business documents into balanced journal entries using configured rules.
 - **SoftPOS:** Software that accepts contactless cards on an ordinary NFC phone or tablet.
+- **Suspense account:** A temporary account for amounts that can't yet be classified; must be cleared before a period closes.
 - **SUS (System Usability Scale):** A standard 10-question usability survey scored 0–100.
 - **System of record:** The system whose data is treated as the official version of a given object.
+- **Trial balance:** A list of all ledger balances; total debits must equal total credits.
 - **Three-way match:** Checking a supplier invoice against the purchase order and goods received note before paying.
 - **UoM:** Unit of measure.
 - **Variance:** The difference between the stock that should have been used (according to sales) and the stock actually used (according to counts).
@@ -1160,4 +1549,5 @@ Industry articles, vendor pages and documentation consulted in September 2026. F
 - Restaurant / resto-bar POS: [EHL Insights: Restaurant Technology 2026](https://insights.ehl.edu/restaurant-technology) · [Expert Market: Best Restaurant POS 2026](https://www.expertmarket.com/pos/best-pos-restaurants) · [RestroScout: Toast vs Square vs Lightspeed](https://restroscout.com/best-restaurant-pos-systems) · [Guideflow: Kitchen Display Systems 2026](https://www.guideflow.com/blog/kitchen-display-system) · [LithosPOS: POS Trends 2026](https://lithospos.com/blog/pos-system-trends-2026-ai-voice-ordering-cloud-technology-reshaping-retail-and-restaurants/)
 - Pricing: [Toast Pricing](https://pos.toasttab.com/pricing) · [Restaurant Velocity: Toast vs Square vs Lightspeed vs Clover vs TouchBistro vs Revel](https://restaurantvelocity.com/blog/best-restaurant-pos-systems/) · [Beancount.io: Toast vs Square vs Clover 2026](https://beancount.io/blog/2026/07/10/toast-square-clover-pos-system-guide) · [ECOSIRE: Odoo POS vs Square/Toast/Clover/Lightspeed 2026](https://ecosire.com/blog/odoo-pos-vs-square-toast-clover-lightspeed-2026)
 - Market data: [IHL Group: USA POS Terminal Market 2026](https://www.ihlservices.com/news/analyst-corner/2026/03/usa-pos-terminal-market-2026/) · [Straits Research: Cloud POS Market](https://straitsresearch.com/press-release/global-cloud-pos-market-trends) · [LocalExpress: Grocery POS Statistics 2026](https://www.localexpress.io/post/grocery-pos-system-integration-statistics) · [Business Research Insights: Grocery POS Market](https://www.businessresearchinsights.com/market-reports/grocery-pos-systems-market-116654)
+- Accounting books, errors and inventory accounting: [Achievable: Books of prime entry](https://achievable.me/define/books-of-prime-entry/) · [Thinka: Books of original entry and types of ledgers](https://www.thinka.ai/en-US/Senior-Secondary-HKDSE/Business-Accounting-and-Financial-Studies/Books-of-Original-Entry-and-Types-of-Ledgers) · [AdminAdvice: Bookkeeping journals and ledgers](https://adminadvice.com/bookkeeping-journals-and-ledgers) · [GeeksforGeeks: Types of errors in trial balance](https://www.geeksforgeeks.org/accountancy/types-of-errors-in-trial-balance/) · [InTime: Errors not revealed by a trial balance](https://intimeaccounting.com/blog/trial-balance/errors-not-revealed) · [WallStreetMojo: Trial balance errors](https://www.wallstreetmojo.com/trial-balance-errors/) · [NetSuite: Perpetual inventory](https://www.netsuite.com/portal/resource/articles/inventory-management/what-is-perpetual-inventory.shtml) · [AccountingCoach: Inventory and COGS](https://www.accountingcoach.com/inventory-and-cost-of-goods-sold/explanation) · [Cleverence: COGS in a perpetual inventory system](https://www.cleverence.com/articles/for-business/cost-of-goods-sold-perpetual-inventory-system-4729/)
 - Payments and security: [Bluefin: What is PCI DSS 4.0](https://www.bluefin.com/bluefin-news/what-is-pci-dss-4-0/) · [PCI SSC: SAQ P2PE v4.0](https://listings.pcisecuritystandards.org/documents/PCI-DSS-v4-0-SAQ-P2PE.pdf) · [Finix: In-Person Payments Guide](https://finix.com/resources/blogs/complete-guide-inpersonpaymentsprocessing-2025) · [EazyPay Tech: SoftPOS and PCI MPoC](https://eazypaytech.com/softpos-and-pci-mpoc-certification-demystified/)
