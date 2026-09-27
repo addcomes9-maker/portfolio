@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Document type** | Concept note (draft for discussion) |
-| **Version** | 0.4: makes **Finance, Inventory and Sales the three core pillars** of the platform (Sections 19–23): built-in accounting books, books health checks and error correction, perpetual inventory posted to the books, and a sales core with quick reports and insight-to-task. Sections 1–18 keep their numbers. v0.3 added management roles, users and usability for each service (Section 7) and the barista / coffee station process (R15). v0.2 added the process-by-process feature design and positioning over existing POS and ERP systems. |
+| **Version** | 0.5: adds **business documents and document flows** (Section 24): the full procurement → delivery → invoicing → payment cycle and the selling cycle, with each document's effect on stock and the books, and the document engine. v0.4 made **Finance, Inventory and Sales the three core pillars** of the platform (Sections 19–23): built-in accounting books, books health checks and error correction, perpetual inventory posted to the books, and a sales core with quick reports and insight-to-task. Sections 1–18 keep their numbers. v0.3 added management roles, users and usability for each service (Section 7) and the barista / coffee station process (R15). v0.2 added the process-by-process feature design and positioning over existing POS and ERP systems. |
 | **Date** | September 2026 |
 | **Scope** | Point-of-sale (POS) and store-management platform for three verticals: supermarkets / grocery, bars / pubs / lounges, and resto-bars (restaurant + bar hybrids) |
 | **Basis** | (a) How these businesses run each process manually today; (b) the features of POS platforms in wide use (Toast, Square, Lightspeed, Clover, TouchBistro, Revel, Shift4/SkyTab, Oracle MICROS Simphony, NCR Voyix/Aloha, IT Retail, LOC, and bar-inventory tools such as BinWise and BevSpot); (c) the features of ERP systems with POS or retail modules (Odoo, ERPNext, LS Central on Microsoft Dynamics 365 Business Central, Microsoft Dynamics 365 Commerce, SAP, Oracle Retail Xstore). See **Sources**. |
@@ -48,6 +48,7 @@
 21. Inventory core (IN1–IN11), working with Finance
 22. Sales core (SA1–SA12), working with Inventory and Finance
 23. How the three cores work together
+24. Business documents and document flows (DOC1–DOC12)
 - Appendix A: Feature matrix by mode
 - Appendix B: Glossary
 - Sources
@@ -72,6 +73,15 @@ At the heart of the platform are **three core pillars, built in this order: Fina
 - **Sales** turns every sale into correct stock and correct books, and into quick reports and simple tasks for owners and managers.
 
 The three cores reconcile with each other every day, so the financial figures shown are always backed by stock and sales records.
+
+Every event in the cores starts from a **business document** (Section 24):
+- commercial documents: requisition, RFQ, quotation, proforma, purchase and sales orders;
+- delivery documents: delivery note, goods received note;
+- billing documents: tax invoice, advance invoice, credit and debit notes;
+- payment documents: payment voucher, receipt;
+- adjustments and statements of account.
+
+They link into complete flows for buying and selling (prepaid, postpaid and direct cash), so every figure can be traced back to its paperwork.
 
 Around the cores, the platform has shared modules (payments, customers, staff, reporting) and **three vertical modes**: Supermarket, Bar and Resto-bar. A business switches on one or more. Section 6 designs every major business process in detail: how it is done manually today, what existing POS and ERP systems provide, where the gaps are, and the specific features this platform will provide. Section 7 designs the system around **the people who manage and use it**: owners, store, bar and restaurant managers, supervisors, cashiers, bartenders, baristas, servers, chefs, storekeepers and accountants. It covers role-specific screens, permissions, approval limits, daily management routines, and usability in each working environment, from a dark, noisy bar to a hot kitchen or a busy checkout lane.
 
@@ -1099,7 +1109,7 @@ The platform combines what cloud POS products do best (speed, simplicity, paymen
 
 ### 19.1 The principle: one event, three views, one truth
 
-Every business event touches all three cores at once. A sale, delivery, return, waste entry or stock count is recorded as **one source document**. From that document the platform produces three consistent records:
+Every business event touches all three cores at once. A sale, delivery, return, waste entry or stock count is recorded as **one source document** (the document types and flows are defined in Section 24). From that document the platform produces three consistent records:
 
 | Core | What it records from the event | Question it answers |
 |---|---|---|
@@ -1441,7 +1451,7 @@ Every night (and on demand), the platform proves that the three cores agree. Any
 
 ### 23.5 Build order
 
-1. **Finance core (F1–F19)**, including posting engine, books, ledgers, reconciliations, health checks and close.
+1. **Document engine (DOC1–DOC12, Section 24)** and **Finance core (F1–F19)**, including posting engine, books, ledgers, reconciliations, health checks and close.
 2. **Inventory core (IN1–IN11)**, wired to Finance: every movement posts; IN10 reconciliation passes.
 3. **Sales core (SA1–SA12)**, wired to both: every sale depletes stock and posts; the three-way reconciliation passes; quick reports and insight-to-task work.
 4. Then the POS terminal apps, payments, purchasing and the supermarket, bar and resto-bar modes, all on top of the cores.
@@ -1450,10 +1460,196 @@ For a build already under way, the implementation prompt guide (Part H) contains
 
 ---
 
+## 24. Business documents and document flows (DOC1–DOC12)
+
+> **Added in v0.5.** Every event in the three cores (Section 19) starts from a **business document**. This section defines which documents the platform supports, what each one does to stock and to the books, how they link into flows for buying and selling, and the document engine that manages them.
+
+### 24.1 Kinds of document
+
+Not every document is an invoice. The platform classifies documents by what they prove or change, which determines their effect on the cores:
+
+| Kind | What it does | Effect on the cores | Examples |
+|---|---|---|---|
+| **Commercial** | Proposes, requests or commits to a transaction | None on stock or books; tracked as commitments (open orders, budget commitments, reserved stock) | Purchase requisition, RFQ, quotation, proforma invoice, purchase order, sales order |
+| **Delivery / stock** | Proves goods physically moved | Stock movement (Inventory core); accrual in the books where needed (GRNI) | Delivery note, goods received note, return note, transfer note, stock adjustment |
+| **Billing** | Records the amount legally owed | Books (Finance core): receivable or payable, revenue or cost, tax | Tax invoice, commercial invoice, advance payment invoice, credit note, debit note |
+| **Payment** | Authorises, records or proves payment | Books: cash, bank or clearing accounts; settles receivables and payables | Payment voucher, receipt, remittance advice, deposit slip |
+| **Accounting adjustment** | Corrects or adjusts the books without a new trade | Books only, through the correction wizard (F15) | Journal voucher, credit/debit adjustment |
+| **Reporting** | Summarises a relationship or a period | None (read-only) | Statement of account, Z-report, cash-up sheet |
+
+### 24.2 Document catalogue
+
+**Core documents (from the procurement → delivery → invoicing → payment cycle)**
+
+| # | Document | Main purpose | Issued by → to | Stock effect | Finance effect | Book / ledger |
+|---|---|---|---|---|---|---|
+| 1 | **Purchase requisition (PR)** | Internal request to buy goods or services | Staff/manager → buyer | None | Optional budget pre-commitment | — |
+| 2 | **Request for quotation (RFQ)** | Ask one or more suppliers for prices and terms | Buyer → suppliers | None | None | — |
+| 3 | **Quotation** | Price and terms offered | Supplier → us (buying); us → customer (selling) | None | None | — |
+| 4 | **Proforma invoice** | Preliminary invoice showing what is expected to be charged; often used to request prepayment or for import/customs | Seller → buyer | None | None (not an accounting document) | — |
+| 5 | **Purchase order (PO)** | Official order to a supplier | Us → supplier | "On order" quantity | Budget commitment | — |
+| 6 | **Sales order (SO)** | Records a customer's confirmed order | Us (seller) | Stock reserved/allocated | None (commitment) | — |
+| 7 | **Delivery note (DN)** | Confirms what goods were dispatched/delivered; travels with the goods | Seller → buyer | Selling: stock out (and COGS). Buying: basis for our GRN | Selling: COGS posted | Stock ledger |
+| 8 | **Goods received note (GRN)** | Buyer confirms what was actually received (quantity, condition, batch, expiry) | Us (receiver) | Stock in | Dr Inventory (or asset/expense) · Cr GRNI | Stock ledger; GRNI |
+| 9 | **Tax invoice / commercial invoice** | Legally records the amount owed, with tax | Seller → buyer | None (stock already moved) | Selling: Dr Debtors · Cr Sales, Cr Output tax. Buying: Dr GRNI/expense, Dr Input tax · Cr Supplier | Sales or purchases day book; debtors or creditors ledger |
+| 10 | **Advance payment invoice** | Requests or records payment before delivery | Seller → buyer | None | Selling: customer advance (liability). Buying: supplier advance (asset). Tax on advances where the law requires it | Sales/purchases day book |
+| 11 | **Receipt** | Proof that payment was received | Seller → buyer | None | Selling: Dr Cash/Bank/Clearing · Cr Debtors (or sales, for a cash sale) | Cash book / bank book |
+| 12 | **Credit note** | Reduces a previously invoiced amount (return, discount, price error) | Seller → buyer | If goods returned: stock in (selling) or out (buying) | Reverses revenue/cost and tax proportionally | Sales/purchases returns day book |
+| 13 | **Debit note** | *Seller's use:* increases a previously invoiced amount (undercharge, extra cost). *Buyer's use:* claims a reduction from the supplier (return, shortage, damage), which the supplier answers with a credit note | Seller → buyer, or buyer → supplier | Buyer's claim with return: stock out | Seller's: additional receivable, revenue and tax. Buyer's: Dr Supplier · Cr Inventory/GRNI (claim) | Sales day book or purchases returns day book |
+| 14 | **Payment voucher** | Internal document that authorises and records a payment, with approvals and attached invoices | Us (accounts) | None | Dr Supplier (or expense) · Cr Bank/Cash | Cash book / bank book; creditors ledger |
+| 15 | **Credit/debit adjustment (journal voucher)** | Accounting correction or adjustment without a new trade (reclassification, write-off, accrual) | Us (accountant) | Only if it is a stock revaluation | Any balanced adjustment, with reason and approval | General journal |
+| 16 | **Statement of account** | Summary of invoices, credit notes, payments and outstanding balance for one customer or supplier | Us → customer; supplier → us | None | None (reconciled against the ledger) | Debtors/creditors ledger |
+
+**Other documents that modern POS and ERP systems use**
+
+| Document | Purpose | Used in | Core effect |
+|---|---|---|---|
+| **POS receipt (simplified tax invoice)** | At the till, one document is both the simplified tax invoice and proof of payment | All counters, bars, cafés | Sale + payment together (SA1, SA2) |
+| **Full tax invoice on request** | Issued from a POS receipt for a business customer, with their tax ID; references the receipt | Supermarket, restaurant (business meals) | Replaces the simplified invoice for tax purposes; no double revenue |
+| **Refund receipt** | Proof of a refund at the till | All | Credit note + payment out |
+| **Deposit receipt** | Proof of a reservation, event or container deposit | Resto-bar, bar (VIP), supermarket (crates) | Liability (F14) |
+| **Gift card / voucher receipt** | Proof of sale or top-up of stored value | All | Liability (F14) |
+| **Order ticket (KOT/BOT)** | Kitchen or bar order ticket sent to KDS/BDS or printer | Bar, resto-bar, café | None (operational) |
+| **Guest check / table bill** | Running bill for a table or tab before payment | Bar, resto-bar | None until paid (then POS receipt) |
+| **Pick list / packing slip** | Picking and packing for online, click & collect and B2B orders | Supermarket | None (operational) |
+| **Return to vendor (RTV) note** | Goods sent back to a supplier | All | Stock out; buyer's debit note |
+| **Customer return note** | Goods returned by a customer | Supermarket | Stock in (or to damaged); credit note |
+| **Transfer note** | Stock moved between stores or from store room to bar/kitchen | All | Stock transfer (IN5) |
+| **Stock adjustment / count sheet** | Records counts and approved differences | All | Stock + variance posting (IN7) |
+| **Production order / batch sheet** | Records in-store production (bakery, prep, batched cocktails) | Supermarket, resto-bar, bar | Production movement (IN6) |
+| **Waste note** | Records spoiled, broken or expired goods | All | Stock out + waste expense (IN8) |
+| **Z-report / cash-up sheet** | End-of-day or end-of-shift sales and cash summary | All | Daily sales book (SA8) |
+| **Petty cash voucher** | Small cash payment with receipt photo | All | Petty cash book (F6) |
+| **Expense claim** | Staff reimbursement request | All | Expense book, payable to staff |
+| **Remittance advice** | Tells a supplier which invoices a payment covers | Buying | None (sent with payment) |
+| **Bank deposit slip** | Cash banked from the safe | All | Cash book → bank book |
+| **Payment reminder (dunning letter)** | Chases overdue customer invoices | B2B selling | None |
+
+### 24.3 Buying flows (procure-to-pay)
+
+**Standard (postpaid / credit terms)**
+
+> **Requisition → RFQ → Quotation → (Proforma) → Purchase order → Delivery note → GRN → Tax invoice → Payment voucher → Payment → Receipt**
+
+**Prepaid**
+
+> **PO → Proforma or advance payment invoice → Payment voucher → Payment (supplier advance) → Delivery note → GRN → Final tax invoice (advance allocated) → Receipt**
+
+**Direct / cash purchase** (for example, buying ice or lemons from a market)
+
+> **Purchase → Invoice or cash receipt → Immediate payment (petty cash or card) → Receipt**, recorded as one quick entry that creates the GRN (if it is stock), the invoice and the payment together.
+
+**How this fits each business**
+
+| Situation | Typical flow |
+|---|---|
+| Supermarket, warehouse supplier on credit | PO → DN + GRN on handheld → invoice matched (three-way) → payment run → remittance advice |
+| Supermarket, direct-store-delivery supplier (bread, milk, soft drinks) | Supplier's DN and invoice arrive together at the door → GRN against standing order → invoice matched on the spot |
+| Bar, beverage distributor | Suggested order → PO → DN with kegs/crates → GRN (including returnable containers) → invoice → payment; empty kegs returned on a return note, deposit credited |
+| Resto-bar, market purchases | Direct purchase with petty cash or card → receipt photo → one quick entry |
+| Any business buying equipment (fixed asset) | PR → RFQ → quotations compared → PO → DN → GRN → invoice posted to fixed assets (not inventory) → payment → asset registered, depreciation starts |
+
+**Matching rules**
+- **Two-way match:** PO ↔ invoice (services, where nothing is physically received).
+- **Three-way match:** PO ↔ GRN ↔ invoice (goods), with price and quantity tolerances.
+- **Four-way match (optional):** adds a quality inspection record (for example, cold-chain temperature at receipt).
+
+### 24.4 Selling flows (order-to-cash)
+
+**Walk-in POS sale (most sales in all three businesses)**
+
+> **Sale at the till → Payment → POS receipt** (simplified tax invoice and proof of payment in one). If the customer is a business, a **full tax invoice** can be issued from the receipt.
+
+**Bar tab or restaurant table**
+
+> **Order tickets (KOT/BOT) → Guest check / tab → Payment (card pre-authorised for tabs) → POS receipt**, with tips recorded on the receipt.
+
+**Account customer (for example, a restaurant buying from the supermarket on credit)**
+
+> **Quotation → Sales order → Pick list → Delivery note → Tax invoice → Statement of account (monthly) → Payment → Receipt**, with payment reminders for overdue invoices.
+
+**Prepaid selling (events, catering, large orders, online orders)**
+
+> **Quotation → Proforma or advance payment invoice → Payment → Deposit receipt → Delivery / event → Final tax invoice (advance allocated) → Receipt for any balance**
+
+**Returns and corrections**
+
+> **Customer return note → Credit note → Refund (refund receipt) or credit to account**, and **Debit note** for an undercharge.
+
+### 24.5 Important distinctions the system enforces
+
+- **A delivery note is not an invoice.** A delivery note or GRN moves stock; only a tax/commercial invoice creates the receivable or payable.
+- **A proforma invoice is not an accounting document.** It never posts to the books, and it is numbered in its own series so it can't be confused with a tax invoice.
+- **A receipt proves payment; an invoice records what is owed.** At the till, the POS receipt combines both for a cash or card sale. For credit sales they remain separate.
+- **Issued documents are never edited or deleted.** A wrong tax invoice is corrected with a credit note (and a new invoice if needed), and a wrong PO with a revision. Every change is audited, and fiscal rules (sequential numbering, e-invoicing submission) are respected.
+- **Debit notes have two meanings** (24.2, #13). The system labels which one each debit note is: seller's supplementary charge or buyer's claim.
+- **Advance payments are held separately** (customer advances as a liability, supplier advances as an asset) until the final invoice is issued, then allocated to it automatically.
+
+### 24.6 Worked examples
+
+**Buying 10 laptops for the office (fixed asset, 20% VAT), postpaid**
+
+| Document | Stock / asset | Journal |
+|---|---|---|
+| Requisition, RFQ, quotations (3 compared), proforma | — | — |
+| Purchase order: 10 × 1,000.00 | On order: 10 | Budget commitment 10,000.00 (no journal) |
+| Delivery note + GRN: 10 received | Asset under receipt | Dr Fixed assets (IT equipment) 10,000.00 · Cr GRNI 10,000.00 |
+| Tax invoice: 10,000.00 + 2,000.00 VAT | — | Dr GRNI 10,000.00 · Dr VAT input 2,000.00 · Cr Supplier 12,000.00 |
+| Payment voucher approved, payment made | — | Dr Supplier 12,000.00 · Cr Bank 12,000.00 |
+| Supplier's receipt attached | 10 laptops added to the fixed asset register; depreciation scheduled | — |
+
+*Prepaid version:* payment before delivery posts Dr Supplier advances 12,000.00 · Cr Bank 12,000.00. When the final invoice arrives, the advance is allocated: Dr Supplier 12,000.00 · Cr Supplier advances 12,000.00. Some countries allow or require input VAT to be recognised at the advance invoice; the tax engine applies the jurisdiction's rule.
+
+**Selling 50 cases of soft drinks to a restaurant on account (price 20.00, cost 14.00, 20% VAT)**
+
+| Document | Stock | Journal |
+|---|---|---|
+| Quotation → sales order | 50 reserved | — |
+| Pick list → delivery note | −50 cases | Dr COGS 700.00 · Cr Inventory 700.00 |
+| Tax invoice | — | Dr Debtors 1,200.00 · Cr Sales 1,000.00 · Cr VAT output 200.00 |
+| Statement of account (month end) | — | — |
+| Payment received → receipt | — | Dr Bank 1,200.00 · Cr Debtors 1,200.00 |
+| 2 damaged cases returned → return note + credit note | +2 to "damaged", then written off | Dr Sales returns 40.00 · Dr VAT output 8.00 · Cr Debtors 48.00; Dr Inventory 28.00 · Cr COGS 28.00; Dr Waste 28.00 · Cr Inventory 28.00 |
+
+### 24.7 Document engine features
+
+| ID | Feature | Details |
+|---|---|---|
+| **DOC1** | Document types and numbering | Configurable document types; separate number series per type, entity, location, terminal and fiscal year; sequential and gapless where the law requires; prefixes (for example, `INV-2026-000123`, `PF-…` for proformas) |
+| **DOC2** | Lifecycle and status | Draft → submitted → approved → issued/sent → partially fulfilled → fulfilled → closed; cancelled/voided with rules per type (issued billing documents are corrected by credit note, never voided silently) |
+| **DOC3** | Convert and copy | Create the next document from the previous one with one action (RFQ → PO, quotation → SO → DN → invoice, PO → GRN → invoice), carrying lines, prices, taxes and references |
+| **DOC4** | Partial fulfilment tracking | Quantities ordered, delivered/received, invoiced, returned and paid, per line; back-orders; over/under-delivery tolerances |
+| **DOC5** | Document flow view | Every document shows its full chain (predecessors and successors) as a tree, with amounts and statuses; open from any document |
+| **DOC6** | Matching | Two-, three- and four-way matching with tolerances; exceptions to the approval queue (links F10, S3) |
+| **DOC7** | Payment terms and flows | Prepaid, postpaid (net days, end-of-month, instalments), cash on delivery, direct cash; early-payment discounts; advances and their allocation |
+| **DOC8** | Approvals and controls | Approval rules per document type and amount (from 7.5); segregation of duties (requester ≠ approver; receiver ≠ invoice approver) |
+| **DOC9** | Templates and legal content | Printable/PDF templates per country and language with mandatory legal fields (seller/buyer tax IDs, tax breakdown, fiscal codes, QR codes where required) |
+| **DOC10** | E-invoicing and sending | Send by email, WhatsApp, supplier/customer portal or EDI; structured e-invoice formats (for example, UBL/Peppol or the national format) through the fiscal connector (F11) |
+| **DOC11** | Revisions and audit | PO and quotation revisions with version history; attachments (photos, signed delivery notes, supplier receipts); full audit trail |
+| **DOC12** | Statements and reminders | Customer and supplier statements of account; automatic payment reminders; supplier statement reconciliation (F8) |
+
+### 24.8 Where each document is created (roles and screens)
+
+| Document | Created by (role, Section 7) | Where |
+|---|---|---|
+| Purchase requisition | Department manager, bar manager, head chef, head barista | Handheld/tablet, or automatically from suggested orders |
+| RFQ, supplier quotation comparison, PO | Buyer, bar manager, purchasing officer | Back office |
+| GRN, return to vendor note | Receiving clerk, cellar person, storekeeper | Handheld at the dock |
+| Supplier tax invoice, debit note, payment voucher | Accountant / bookkeeper | Back office; invoice capture by photo/PDF |
+| Quotation, proforma, sales order, delivery note, tax invoice (B2B) | Store manager, events manager, B2B sales | Back office or tablet |
+| POS receipt, refund receipt, deposit receipt | Cashier, bartender, server, barista | Terminal / handheld |
+| KOT/BOT, guest check | Server, bartender | Terminal / handheld |
+| Transfer, waste, count, production documents | Stock clerk, barback, cooks, bakers | Handheld / tablet |
+| Journal voucher, adjustments | Accountant | Back office (correction wizard) |
+| Statement of account, reminders | Accountant (automated) | Back office, scheduled |
+
+---
+
 ## Appendix A: Feature matrix by mode
 
 | Feature | Core | Supermarket | Bar | Resto-bar |
 |---|:---:|:---:|:---:|:---:|
+| **Document engine and flows: PR, RFQ, quotation, proforma, PO, SO, DN, GRN, invoices, credit/debit notes, payment vouchers, receipts, statements (DOC1–DOC12)** | ● | ● | ● | ● |
 | **Finance core: books, ledgers, reconciliations, health checks, close (F1–F19)** | ● | ● | ● | ● |
 | **Inventory core: perpetual stock posted to the books (IN1–IN11)** | ● | ● | ● | ● |
 | **Sales core: sales posted to stock and books, quick reports, insight-to-task (SA1–SA12)** | ● | ● | ● | ● |
@@ -1502,10 +1698,14 @@ For a build already under way, the implementation prompt guide (Part H) contains
 - **Barback:** Bar assistant who restocks, changes kegs and clears glasses.
 - **Barista:** Staff member who prepares espresso-based and other coffee drinks.
 - **Books of original entry (day books):** Books where transactions are first recorded from source documents before being posted to the ledger (cash book, sales day book, purchases day book, returns books, general journal).
+- **Advance payment invoice:** An invoice requesting or recording payment before delivery; creates a customer advance (seller) or supplier advance (buyer) until the final invoice.
 - **BoM:** Bill of materials; the list of ingredients or components in a product (a recipe, in hospitality).
+- **Credit note:** A document from the seller that reduces a previously invoiced amount.
 - **Clearing account:** A temporary account that holds money between two events, such as a card sale and the provider's settlement to the bank.
 - **Control account:** A general-ledger account whose balance must equal the total of a subsidiary ledger (for example, debtors control = sum of customer balances).
 - **COGS:** Cost of goods sold.
+- **Debit note:** Either a seller's document that increases a previously invoiced amount, or a buyer's claim asking the supplier for a reduction (answered by a credit note).
+- **Delivery note (DN):** A document that travels with goods and confirms what was delivered; not an invoice.
 - **DSD:** Direct store delivery; suppliers who deliver straight to the store rather than via a warehouse.
 - **DSR:** Daily sales report.
 - **E2EE / P2PE:** End-to-end / point-to-point encryption; card data is encrypted inside the payment terminal.
@@ -1513,23 +1713,31 @@ For a build already under way, the implementation prompt guide (Part H) contains
 - **ESL:** Electronic shelf label; a digital price tag updated from the POS.
 - **Expeditor (expo):** Person, or screen, that coordinates finished food and drinks so a table's order leaves together.
 - **FEFO / FIFO:** First-expired-first-out / first-in-first-out stock rotation.
+- **KOT / BOT:** Kitchen / bar order ticket.
 - **GRNI:** Goods received not invoiced; a liability recorded when stock arrives before the supplier's invoice.
 - **GRN:** Goods received note.
 - **GTIN:** Global Trade Item Number; the number behind a product barcode.
 - **Imprest system:** A petty cash method where the float is topped up to a fixed amount after spending.
 - **Perpetual inventory:** Stock records updated with quantity and value at every movement, instead of only at periodic counts.
+- **Payment voucher:** An internal document that authorises and records a payment.
 - **PLU:** Price look-up code, used for produce and weighted items.
+- **Proforma invoice:** A preliminary invoice showing what is expected to be charged; not an accounting document.
+- **Purchase requisition (PR):** An internal request to buy goods or services.
 - **PMS:** Hotel property management system.
 - **Pour cost:** Cost of the liquor in a drink ÷ its selling price.
 - **Pre-authorisation:** A temporary hold on a card when a tab is opened.
+- **Receipt:** Proof that payment was received. At the till, the POS receipt is usually also the simplified tax invoice.
 - **Remote approval:** A manager approves a staff request (void, refund, discount) on their phone instead of entering a PIN at the terminal.
+- **RFQ:** Request for quotation sent to suppliers.
 - **Role template:** A predefined set of screens and permissions for a job role, adjustable per person.
 - **Posting engine:** The component that turns business documents into balanced journal entries using configured rules.
+- **Statement of account:** A periodic summary of invoices, credit notes, payments and the outstanding balance for one customer or supplier.
 - **SoftPOS:** Software that accepts contactless cards on an ordinary NFC phone or tablet.
 - **Suspense account:** A temporary account for amounts that can't yet be classified; must be cleared before a period closes.
 - **SUS (System Usability Scale):** A standard 10-question usability survey scored 0–100.
 - **System of record:** The system whose data is treated as the official version of a given object.
 - **Trial balance:** A list of all ledger balances; total debits must equal total credits.
+- **Tax invoice / commercial invoice:** The document that legally records the amount owed, including tax.
 - **Three-way match:** Checking a supplier invoice against the purchase order and goods received note before paying.
 - **UoM:** Unit of measure.
 - **Variance:** The difference between the stock that should have been used (according to sales) and the stock actually used (according to counts).
