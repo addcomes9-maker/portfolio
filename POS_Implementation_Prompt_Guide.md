@@ -100,7 +100,7 @@ Copy everything inside the block below into `CLAUDE.md` at the repository root.
 - Payments: mobile money first (MTN MoMo, Airtel Money; eKash interoperability and unified merchant codes); cards through a local acquirer: TBD which acquirer.
 - First pilot sites: TBD (e.g. 1 supermarket, 1 bar/lounge, 1 resto-bar with café in Kigali)
 - Priority ERP / accounting connectors: TBD (e.g. QuickBooks, Xero, Odoo, Sage)
-- Items marked "Confirm" in concept note Section 25 must be verified with RRA or a Rwandan tax adviser before go-live.
+- Rwanda rules status: see concept note 25.0. Items 1–6 are **confirmed** (advance VAT at receipt; TIN added later = NR + NS reissue; seller debit note = new NS; VAT per tax type on the receipt total; all stock data reported through the VSDC; WHT 15% / 5% / 3%) and are fixed behaviour. Items 7a, 7b, 8 and 9 are **not confirmed**: implement them as settings that are off or empty by default, with no tax treatment assumed.
 
 ## What we are building
 A cloud-native, offline-first POS with an ERP-grade back office, for supermarkets, bars, resto-bars and cafés.
@@ -476,20 +476,21 @@ Rwanda is the first market. Deliver it as a country pack (configuration plus con
 Before writing code:
 - Read the current RRA documents: the Technical Specification of CIS for VSDC, the VSDC specification, and the EBM user manual (links in the concept-note sources).
 - If a newer version exists, or if a document can't be accessed, tell me which versions you used and what you couldn't verify.
-- Build a checklist in docs/compliance/rwanda.md from concept note 25.1–25.9. Every rule has its source and a status: "confirmed from the specification", or "needs confirmation with RRA/tax adviser". Add the second kind to docs/open-questions.md.
+- Build a checklist in docs/compliance/rwanda.md from concept note 25.1–25.9. Every rule has its source and the status from concept note 25.0 ("Confirmed by product owner", "Not confirmed", or "Found in public sources: check yearly"). If the current RRA specification contradicts a confirmed rule, stop and tell me before implementing. Add the not-confirmed items to docs/open-questions.md.
 
 Build:
 - RW1: VSDC connector per the current specification: initialisation, code and reference data retrieval, item and branch registration, sales and refund transmission, purchase retrieval, import items, stock reporting where required, retries and idempotency. Include a VSDC simulator for tests and a certification test suite that mirrors RRA's integration checkpoints and runs in CI.
 - RW2: completeSale cannot complete a sale or refund without a VSDC signature. Store the SDC ID, SDC receipt number, internal data, receipt signature and MRC (or equivalents in the current specification) on the sales document. Print the receipt with every mandatory field and the QR code in the specified format.
 - RW3: tax types A, B (18%), C and D on items and services; tax totals per type calculated exactly as the VSDC does (rounding confirmed against the specification and simulator).
-- RW4/RW5: RRA item classification, packaging and quantity unit codes on the catalogue; customer TIN on B2B invoices; purchase invoices from EBM flowing into supplier-invoice matching.
+- RW4/RW5: RRA item classification, packaging and quantity unit codes on the catalogue; customer TIN on B2B invoices; purchase invoices from EBM flowing into supplier-invoice matching; all stock data reported to RRA through the VSDC (item master, stock received and sold, adjustments, imports), with every Inventory-core movement matched to a VSDC stock report and differences raised as F15 issues.
 - RW6: mapping of our documents to EBM receipt types exactly as in 25.3, including:
   - NR refunds referencing the original receipt;
   - CS/CR copies on reprint;
   - TS/TR in training mode;
   - PS for proformas;
   - the TIN entered before sale completion;
-  - the "Confirm" items implemented behind configuration switches.
+  - the confirmed rules in 25.0 (#1–#6) as fixed behaviour: advance payments get an NS receipt with VAT when received and the final invoice covers the balance; a TIN added later means NR plus NS reissue within the configured limit (default: same VAT return period) with supervisor approval; a seller debit note is a new NS referencing the original;
+  - the not-confirmed items (#7a tips tax, #7b casual workers, #8 digital tax stamps, #9 deferred signing) as settings that are off or empty by default, with no tax treatment assumed.
 - RW7: VSDC hosted on the store edge hub; connectivity monitoring with alerts at 12 and 18 hours; default blocking when no VSDC is reachable; daily reconciliation of platform receipts and tax per type with the VSDC, with differences raised as F15 issues.
 - RW8–RW10: Rwanda chart-of-accounts template (IFRS for SMEs); VAT return report (monthly or quarterly); withholding-tax handling on payment vouchers and receipts; tax calendar reminders.
 - RW11: mobile-money tenders: request-to-pay by phone number (MTN MoMo, Airtel Money), eKash unified merchant code/QR on the customer display, automatic confirmation, refunds where supported, settlement reconciliation. Use the providers' current official API documentation.
@@ -503,7 +504,7 @@ Out of scope: going live with RRA (that needs the business's own VSDC approval a
 Done when:
 - The certification test suite passes against the VSDC simulator (and against the RRA test environment if access is available).
 - Every EBM receipt type in 25.3 is produced correctly.
-- The Rwanda examples in 25.10 reproduce exactly (MoMo bar sale; B2B NS with TIN).
+- The Rwanda examples in 25.10 reproduce exactly (MoMo bar sale; event deposit with advance VAT; B2B NS with TIN).
 - Tax per type matches the VSDC to the franc on a seeded month.
 - A 20-hour VSDC internet outage at the edge hub triggers the alerts without losing a sale.
 - docs/compliance/rwanda.md lists every rule with its source and status.

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Document type** | Concept note (draft for discussion) |
-| **Version** | 0.6: sets **Rwanda as the first market** (Section 25): VAT, RRA electronic invoicing (EBM via VSDC), receipt types, VAT reward, record keeping, withholding tax, excise, IFRS for SMEs, payroll, mobile money over eKash, data residency and localisation. v0.5 added **business documents and document flows** (Section 24): the full procurement → delivery → invoicing → payment cycle and the selling cycle, with each document's effect on stock and the books, and the document engine. v0.4 made **Finance, Inventory and Sales the three core pillars** of the platform (Sections 19–23): built-in accounting books, books health checks and error correction, perpetual inventory posted to the books, and a sales core with quick reports and insight-to-task. Sections 1–18 keep their numbers. v0.3 added management roles, users and usability for each service (Section 7) and the barista / coffee station process (R15). v0.2 added the process-by-process feature design and positioning over existing POS and ERP systems. |
+| **Version** | 0.6.1: records the product owner's confirmation of six Rwanda rules (Section 25.0). v0.6 set **Rwanda as the first market** (Section 25): VAT, RRA electronic invoicing (EBM via VSDC), receipt types, VAT reward, record keeping, withholding tax, excise, IFRS for SMEs, payroll, mobile money over eKash, data residency and localisation. v0.5 added **business documents and document flows** (Section 24): the full procurement → delivery → invoicing → payment cycle and the selling cycle, with each document's effect on stock and the books, and the document engine. v0.4 made **Finance, Inventory and Sales the three core pillars** of the platform (Sections 19–23): built-in accounting books, books health checks and error correction, perpetual inventory posted to the books, and a sales core with quick reports and insight-to-task. Sections 1–18 keep their numbers. v0.3 added management roles, users and usability for each service (Section 7) and the barista / coffee station process (R15). v0.2 added the process-by-process feature design and positioning over existing POS and ERP systems. |
 | **Date** | September 2026 |
 | **Scope** | Point-of-sale (POS) and store-management platform for three verticals: supermarkets / grocery, bars / pubs / lounges, and resto-bars (restaurant + bar hybrids) |
 | **Basis** | (a) How these businesses run each process manually today; (b) the features of POS platforms in wide use (Toast, Square, Lightspeed, Clover, TouchBistro, Revel, Shift4/SkyTab, Oracle MICROS Simphony, NCR Voyix/Aloha, IT Retail, LOC, and bar-inventory tools such as BinWise and BevSpot); (c) the features of ERP systems with POS or retail modules (Odoo, ERPNext, LS Central on Microsoft Dynamics 365 Business Central, Microsoft Dynamics 365 Commerce, SAP, Oracle Retail Xstore). See **Sources**. |
@@ -1652,7 +1652,27 @@ Not every document is an invoice. The platform classifies documents by what they
 
 > **Added in v0.6.** Rwanda is the first market. This section turns Rwandan tax, invoicing, payment, payroll, accounting and data-protection rules into platform requirements. The rest of the concept note stays country-neutral; Rwanda is delivered as a **country pack** of configuration and connectors, so other countries can be added the same way later.
 >
-> **Important:** this profile was compiled from public sources in September 2026 (listed at the end of the note). Tax rates, thresholds and RRA technical specifications change. Before go-live, every item marked **"Confirm"** must be checked with the Rwanda Revenue Authority (RRA), the current VSDC technical specification, and a Rwandan tax adviser or ICPAR-certified accountant. Rates are stored as dated configuration, never hard-coded.
+> **Important:** this profile was compiled from public sources in September 2026 (listed at the end of the note). Tax rates, thresholds and RRA technical specifications change, so rates are stored as dated configuration, never hard-coded, and reviewed at least once a year.
+>
+> The status of each rule is shown in 25.0:
+> - **Confirmed:** confirmed by the product owner on 27 September 2026; implemented as fixed platform behaviour.
+> - **Not confirmed:** no information found. Implemented as a setting that is off or empty by default, with no tax treatment assumed. It must be set with the business's accountant before it is used.
+
+### 25.0 Status of the Rwanda rules
+
+| # | Rule | Status | Decision |
+|---|---|---|---|
+| 1 | VAT on advance payments | **Confirmed** | VAT is due, and an NS receipt is issued, when the advance is received. The final invoice covers only the balance. |
+| 2 | Adding a buyer's TIN after the sale | **Confirmed** | The original receipt is refunded (NR) and reissued (NS) with the TIN. The time limit is a setting; the default is within the same VAT return period. |
+| 3 | Seller's debit note (extra charge) | **Confirmed** | A new NS receipt for the extra amount, referencing the original receipt. |
+| 4 | VAT rounding | **Confirmed** | As the VSDC calculates it: per tax type, on the receipt total. |
+| 5 | Stock reporting through the VSDC | **Confirmed** | All stock data is reported: item master, stock received and sold, adjustments, and imports. |
+| 6 | Withholding tax | **Confirmed** | 15% on specified payments (such as services and rent) unless the supplier is exempt; 5% on goods imported for commercial use; 3% deducted by public institutions on contract payments. |
+| 7a | Tax treatment of tips paid to staff | **Not confirmed** | Setting; no treatment assumed. Tips are tracked as a liability and paid out; their tax treatment is set with the accountant. |
+| 7b | PAYE and RSSB for casual and daily workers | **Not confirmed** | Setting; no treatment assumed. Casual workers can be recorded with daily rates; tax and contribution rules are set with the accountant. |
+| 8 | Retailers' duties on digital tax stamps for drinks | **Not confirmed** | Setting, off by default. Optional stamp scanning at receiving is available but not required. |
+| 9 | Emergency deferred signing when no VSDC is reachable | **Not confirmed** | Disabled. Sales can't complete without a VSDC signature (25.4). |
+| 10 | Payroll rates (PAYE bands, RSSB, maternity, CBHI) | Found in public sources for 2025/26 | Dated settings; check every year and whenever the law changes. |
 
 ### 25.1 Summary of the rules that shape the product
 
@@ -1667,10 +1687,10 @@ Not every document is an invoice. The platform classifies documents by what they
 | **VSDC offline limit** | If the VSDC has had no internet connection for **24 hours** after issuing a receipt signature, it stops issuing receipt numbers | Offline design must keep the VSDC connected (25.4) |
 | **VAT reward (Tengamara)** | Consumers registered for the scheme receive **10% of the VAT** on EBM invoices that carry their registered phone number | Till prompts for the customer's phone number in one tap and prints it on the EBM receipt |
 | **Record keeping** | Books and records kept for **10 years** from 1 January after the fiscal year they relate to (Tax Procedures Law 2023) | Retention of financial records, documents, audit and EBM data set to at least 10 years; no deletion before that |
-| **Withholding tax** | Includes **15%** on certain payments by residents, **5%** on goods imported for commercial use, and **3%** deducted by public institutions on contract payments (**Confirm** scope and exemptions) | Supplier and customer settings for WHT; WHT deducted on payment vouchers and received WHT certificates recorded against receivables |
-| **Excise duty** | Charged on beverages, e.g. beer and spirits at **40–70%** depending on product, soda and non-natural juices **39%**, natural juice **10%**; **digital tax stamps** being extended to beers and soft drinks (Sept 2026) | Bars and supermarkets mostly pay excise inside the purchase price; items carry an excise category for reporting; optional scan/verification of digital tax stamps at receiving (**Confirm** obligations for retailers) |
+| **Withholding tax** | Includes **15%** on certain payments by residents, **5%** on goods imported for commercial use, and **3%** deducted by public institutions on contract payments (**Confirmed**, 25.0 #6) | Supplier and customer settings for WHT; WHT deducted on payment vouchers and received WHT certificates recorded against receivables |
+| **Excise duty** | Charged on beverages, e.g. beer and spirits at **40–70%** depending on product, soda and non-natural juices **39%**, natural juice **10%**; **digital tax stamps** being extended to beers and soft drinks (Sept 2026) | Bars and supermarkets mostly pay excise inside the purchase price; items carry an excise category for reporting; optional scan/verification of digital tax stamps at receiving (**Not confirmed**: setting, off by default, 25.0 #8) |
 | **Accounting standards** | Companies Act 2018; ICPAR sets standards consistent with IFRS. Private companies without public accountability apply **IFRS for SMEs** | Chart-of-accounts templates and financial statements aligned with IFRS for SMEs |
-| **Payroll (2025/26)** | PAYE monthly bands: RWF 0–60,000 at 0%; 60,001–100,000 at 10%; 100,001–200,000 at 20%; above 200,000 at 30%. RSSB pension **6% employee + 6% employer** (rising towards 2030); maternity **0.3% + 0.3%**; CBHI **0.5% of net pay** (**Confirm** current rates and any occupational-hazard contribution) | Payroll rules as dated configuration; payroll journals post to F13; tips and service charges handled per Rwandan practice (**Confirm** tax treatment) |
+| **Payroll (2025/26)** | PAYE monthly bands: RWF 0–60,000 at 0%; 60,001–100,000 at 10%; 100,001–200,000 at 20%; above 200,000 at 30%. RSSB pension **6% employee + 6% employer** (rising towards 2030); maternity **0.3% + 0.3%**; CBHI **0.5% of net pay** (check every year, 25.0 #10) | Payroll rules as dated configuration; payroll journals post to F13; tax treatment of tips is a setting (**Not confirmed**, 25.0 #7a) |
 | **Payments** | Very high mobile-money use (MTN MoMo, Airtel Money). Since July 2026, **eKash** (National Bank of Rwanda) is the single instant rail for interoperable transfers, with **unified merchant codes** across networks | Mobile money as a first-class tender: request-to-pay by phone number, unified merchant QR/code, automatic confirmation and settlement reconciliation |
 | **Data protection** | Law No. 058/2021: register with the supervisory authority (NCSA / Data Protection and Privacy Office) and hold a DPP certificate; **personal data must be stored in Rwanda** unless the entity holds authorisation to store it abroad | Rwandan tenants' personal data hosted in Rwanda, or the platform operator obtains authorisation; processing register; consent and data-subject rights |
 | **Time and language** | Central Africa Time (UTC+2, no daylight saving). Official languages Kinyarwanda, English, French; Swahili widely used | UI and receipts in Kinyarwanda, English and French (Swahili optional); business day cut-off per location |
@@ -1685,7 +1705,7 @@ The platform is a **Certified Invoicing System (CIS)** that talks to RRA through
 | **RW2** | Fiscal receipt on every sale and refund | `completeSale` (SA1) cannot finish a sale until the VSDC returns the SDC ID, SDC receipt number, internal data and receipt signature. These are stored on the sales document, printed on the receipt, and encoded in the QR code (`ddmmyyyy#hhmmss#sdc_id#sdc_receipt_number#internal_data#receipt_signature`). Our own invoice number series (DOC1) is kept alongside |
 | **RW3** | Tax types | Items and services carry an RRA tax type: **A** exempt; **B** taxable at 18%; **C** zero-rated/export; **D** for taxpayers not registered for VAT. Receipt tax totals per type must equal the VSDC's calculation to the franc |
 | **RW4** | Master and reference data | Item registration with RRA item classification codes, packaging and quantity unit codes, and other standard codes retrieved from the VSDC; customer TIN lookup where available; branch and user registration as the specification requires |
-| **RW5** | Purchases, imports and stock reporting | Retrieve purchase invoices issued to the business's TIN through EBM and bring them into supplier invoice matching (F10, DOC6); import items declared at customs; report stock movements (stock in/out and stock master) as the VSDC specification requires for the taxpayer's type (**Confirm** exact obligations) |
+| **RW5** | Purchases, imports and stock reporting | Retrieve purchase invoices issued to the business's TIN through EBM and bring them into supplier invoice matching (F10, DOC6); import items declared at customs; report all stock data to RRA through the VSDC: item master, stock received and sold, adjustments, and imports (**Confirmed**, 25.0 #5). Every Inventory-core movement (Section 21) has a matching VSDC stock report |
 
 ### 25.3 How our documents map to EBM receipts (RW6)
 
@@ -1693,13 +1713,13 @@ The platform is a **Certified Invoicing System (CIS)** that talks to RRA through
 |---|---|---|
 | POS receipt (walk-in sale) | **NS**: Normal Sale | Official. Customer TIN optional for consumers; phone number for the VAT reward on request |
 | Tax invoice to a business customer | **NS** with the buyer's **TIN** | Buyer's TIN required so the buyer can claim input VAT; the sale then appears in the buyer's EBM purchases |
-| Full tax invoice on request (from a POS receipt) | **Confirm with RRA**: usually the NS receipt is issued with the buyer's TIN at the time of sale; if added later, the original may need to be refunded (NR) and reissued (NS) with the TIN | The till lets the cashier enter the TIN *before* completing the sale |
+| Full tax invoice on request (from a POS receipt) | The NS receipt is issued with the buyer's TIN at the time of sale. If the TIN is added later, the original is refunded (**NR**) and reissued (**NS**) with the TIN (**Confirmed**, 25.0 #2) | The till prompts for a TIN *before* completing the sale; a later reissue is allowed within the configured limit (default: same VAT return period), needs supervisor approval, and links both receipts |
 | Refund receipt / credit note | **NR**: Normal Refund, referencing the original receipt number | Partial refunds per line; stock and books follow SA4 |
-| Debit note (seller's supplementary charge) | **NS** for the additional amount, referencing the original (**Confirm**) | Labelled as supplementary charge |
+| Debit note (seller's supplementary charge) | **NS** for the additional amount, referencing the original receipt (**Confirmed**, 25.0 #3) | Labelled as supplementary charge |
 | Reprint of a receipt | **CS / CR**: Copy of sale / refund | Marked "COPY"; never official |
 | Training mode (Section 7.8) | **TS / TR**: Training sale / refund | Never official; never posts to the books or stock |
 | Proforma invoice | **PS**: Proforma | Never official; never posts |
-| Advance payment | **Confirm** time-of-supply rules under VAT Law 049/2023: whether VAT and an NS receipt are due when the advance is received | The tax engine and document engine support both options; the Rwanda pack selects the confirmed one |
+| Advance payment | **NS** receipt for the advance, with VAT, when the advance is received (**Confirmed**, 25.0 #1) | The final invoice (NS) covers only the balance, referencing the advance receipt. A refunded advance is reversed with an NR |
 | Cancelled sale | Not deleted: cancelled by an NR referencing the original | Never void a signed receipt silently |
 
 ### 25.4 Offline operation with EBM (RW7)
@@ -1707,7 +1727,7 @@ The platform is a **Certified Invoicing System (CIS)** that talks to RRA through
 Offline selling (Section 8.2) must still produce signed fiscal receipts:
 - The VSDC runs on the **store edge hub** (a local server with UPS and a 4G/5G backup link), so terminals can sign receipts over the LAN when the cloud or the fibre line is down.
 - The platform monitors how long the VSDC has been without internet. It alerts the manager at 12 hours and the owner at 18 hours, well before the **24-hour** limit when the VSDC stops issuing receipt numbers.
-- If a terminal can't reach the VSDC at all, it doesn't issue unsigned receipts as if they were official. The default is to block completion and route the sale to another terminal. Whether any deferred-signing emergency mode is allowed must be **confirmed with RRA** before it is enabled.
+- If a terminal can't reach the VSDC at all, it doesn't issue unsigned receipts as if they were official. The default is to block completion and route the sale to another terminal. No deferred-signing emergency mode exists (**Not confirmed**, 25.0 #9); it could only be added after written confirmation from RRA.
 - EBM data is reconciled daily: receipts, totals and tax per type in the platform must equal what the VSDC reports. Differences appear in the books health checks (F15).
 
 ### 25.5 Rwanda tax configuration in the Finance core (RW8–RW10)
@@ -1716,7 +1736,7 @@ Offline selling (Section 8.2) must still produce signed fiscal receipts:
 |---|---|
 | **RW8** | Chart-of-accounts templates for Rwanda (IFRS for SMEs), including: VAT output and input by tax type, VAT payable/refundable, withholding tax payable and receivable, excise (for businesses that pay it directly), PAYE payable, RSSB pension and maternity payable, CBHI payable, mobile-money clearing accounts per provider, EBM variance/suspense |
 | **RW9** | VAT return report in the structure RRA's declaration requires (sales by tax type, purchases with supplier TINs and EBM references, input VAT, adjustments); monthly or quarterly according to the business's filing frequency; reminders before the 15th |
-| **RW10** | Withholding tax: flags on suppliers and customers; WHT deducted on payment vouchers with certificates; WHT suffered by the business recorded as a tax credit; monthly WHT report (**Confirm** rates, exemptions and filing format) |
+| **RW10** | Withholding tax: flags on suppliers and customers; WHT deducted on payment vouchers with certificates; WHT suffered by the business recorded as a tax credit; monthly WHT report. Rates as confirmed in 25.0 #6: 15% on specified payments such as services and rent unless the supplier is exempt; 5% on commercial imports; 3% withheld by public institutions from payments to the business, recorded as a tax credit |
 
 ### 25.6 Payments in Rwanda (RW11)
 
@@ -1728,8 +1748,8 @@ Offline selling (Section 8.2) must still produce signed fiscal receipts:
 ### 25.7 Payroll, tips and staff (RW12)
 
 - PAYE bands and RSSB, maternity and CBHI rates as dated configuration, for payroll calculation or for validating journals imported from a payroll provider (F13).
-- Casual and daily workers (common in bars and restaurants) supported with daily rates (**Confirm** PAYE and RSSB treatment of casual workers).
-- Tips and service charges tracked as liabilities and distributed per the tip-pool rules (B8), with their payroll and tax treatment per Rwandan rules (**Confirm**).
+- Casual and daily workers (common in bars and restaurants) supported with daily rates. Their PAYE and RSSB treatment is a setting with no default (**Not confirmed**, 25.0 #7b).
+- Tips and service charges tracked as liabilities and distributed per the tip-pool rules (B8). Their tax treatment is a setting with no default (**Not confirmed**, 25.0 #7a).
 
 ### 25.8 Data protection and hosting (RW13)
 
@@ -1747,10 +1767,14 @@ Offline selling (Section 8.2) must still produce signed fiscal receipts:
 ### 25.10 Rwanda examples
 
 **A bar sale in Kigali, paid by MTN MoMo:** 2 bottles of beer at RWF 1,500 each, tax type B (18% VAT included).
-- Total RWF 3,000. VAT = 3,000 × 18/118 = 457.63, which rounds to **RWF 458**. Net sales **RWF 2,542**. (The rounding method must match the VSDC's calculation exactly; **confirm** whether VAT is rounded per line or per receipt.)
+- Total RWF 3,000. VAT = 3,000 × 18/118 = 457.63, which rounds to **RWF 458**. Net sales **RWF 2,542**. (VAT is calculated per tax type on the receipt total, as the VSDC does: **Confirmed**, 25.0 #4.)
 - The customer pays by request-to-pay; the MoMo confirmation arrives; the VSDC signs the NS receipt; the receipt prints with the QR code and the customer's phone number for the VAT reward.
 - Journal: Dr MoMo clearing 3,000 · Cr Beverage sales 2,542 · Cr VAT output (type B) 458; Dr COGS beverage · Cr Inventory at cost.
 - Settlement: Dr Bank · Dr Mobile-money fees · Cr MoMo clearing 3,000.
+
+**An event deposit at a resto-bar:** a customer pays an advance of RWF 118,000 by bank transfer for a party.
+- An NS receipt is issued for the advance: VAT = 118,000 × 18/118 = RWF 18,000; journal Dr Bank 118,000 · Cr Customer advances 100,000 · Cr VAT output (type B) 18,000.
+- After the event, the bill totals RWF 295,000 including VAT. The final NS receipt covers only the balance of RWF 177,000 (VAT RWF 27,000). The advance is released: Dr Customer advances 100,000 · Cr Sales 100,000; and for the balance: Dr Bank 177,000 · Cr Sales 150,000 · Cr VAT output 27,000.
 
 **A supermarket selling to a restaurant on account:** the tax invoice is an NS receipt with the restaurant's TIN. The sale appears in the restaurant's EBM purchases, and if that restaurant also uses this platform, it arrives in their supplier-invoice matching automatically (RW5).
 
