@@ -2,7 +2,7 @@
 
 This guide contains the prompts to give **Claude Opus 5.5** (in Claude Code or a similar agentic coding environment) to build the system described in `POS_Concept_Note.md`: a cloud-native, offline-first POS with ERP-grade back office for supermarkets, bars, resto-bars and cafés.
 
-> **Updated for concept note v0.5.** Finance, Inventory and Sales are the three core pillars of the system, built in that order through the core prompts **C1 (Finance), C2 (Inventory) and C3 (Sales)**. They sit on a **document engine (C0)** that manages every business document: requisitions, RFQs, quotations, proformas, purchase and sales orders, delivery notes, GRNs, invoices, credit and debit notes, payment vouchers, receipts and statements (concept note Section 24). If you already started building from the earlier version, go to **Part H** for the upgrade path.
+> **Updated for concept note v0.6.** The first market is **Rwanda** (concept note Section 25): the Project facts in `CLAUDE.md` are prefilled for Rwanda, and a new **RW** milestone delivers RRA electronic invoicing (EBM through the VSDC), Rwandan tax, mobile money, payroll rules and data residency. Finance, Inventory and Sales are the three core pillars of the system, built in that order through the core prompts **C1 (Finance), C2 (Inventory) and C3 (Sales)**. They sit on a **document engine (C0)** that manages every business document: requisitions, RFQs, quotations, proformas, purchase and sales orders, delivery notes, GRNs, invoices, credit and debit notes, payment vouchers, receipts and statements (concept note Section 24). If you already started building from the earlier version, go to **Part H** for the upgrade path.
 
 It has eight parts:
 
@@ -24,10 +24,10 @@ It has eight parts:
 ### A.1 Setup
 
 1. Create a **new, empty repository** for the product (for example `unified-pos`). Don't build it inside a portfolio or documents repository.
-2. Copy `POS_Concept_Note.md` into it as **`docs/concept-note.md`**. This is the specification. Every prompt below refers to it by section number (S1–S15, B1–B13, R1–R15, E1–E9, the core IDs F1–F19, IN1–IN11 and SA1–SA12, the document IDs DOC1–DOC12, Section 5 deployment modes, Section 7 roles and usability, Sections 19–23 core pillars, Section 24 business documents).
+2. Copy `POS_Concept_Note.md` into it as **`docs/concept-note.md`**. This is the specification. Every prompt below refers to it by section number (S1–S15, B1–B13, R1–R15, E1–E9, the core IDs F1–F19, IN1–IN11 and SA1–SA12, the document IDs DOC1–DOC12, the Rwanda IDs RW1–RW14, Section 5 deployment modes, Section 7 roles and usability, Sections 19–23 core pillars, Section 24 business documents, Section 25 Rwanda).
 3. Copy Part B of this guide into the repository root as **`CLAUDE.md`**. Claude Code reads it automatically at the start of every session, so the rules persist across sessions.
-4. Fill in the **"Project facts"** block at the top of `CLAUDE.md`: countries, currencies, languages, first customers, and the ERP and payment providers to support first. Leave anything unknown as "TBD". Prompt 0 will list the open questions.
-5. Choose model **Claude Opus 5.5**. Use effort **`xhigh`** for Prompt 0, the core milestones C0, C1, C2 and C3, and milestones M1, M4, M10 and M14 (architecture-heavy, correctness-critical). Use **`high`** for the others. Lower effort only for small fixes.
+4. Check the **"Project facts"** block at the top of `CLAUDE.md`. It is prefilled for Rwanda; complete the pilot sites and providers, and leave anything unknown as "TBD". Prompt 0 will list the open questions.
+5. Choose model **Claude Opus 5.5**. Use effort **`xhigh`** for Prompt 0, the core milestones C0, C1, C2 and C3, the Rwanda milestone RW, and milestones M1, M4, M10 and M14 (architecture-heavy, correctness-critical). Use **`high`** for the others. Lower effort only for small fixes.
 
 ### A.2 Working rhythm
 
@@ -52,6 +52,8 @@ C2   INVENTORY CORE: perpetual stock ledger posted to the books, valuation, GRNI
      counts and variance, inventory–finance reconciliation (IN1–IN11)  [replaces M3]
 C3   SALES CORE: sales documents posted to stock and books, tenders and clearing,
      Z-close, quick reports, insight-to-task, three-way reconciliation (SA1–SA12)
+RW   RWANDA COMPLIANCE PACK: EBM receipts via VSDC, RRA tax types, VAT return,
+     WHT, mobile money over eKash, payroll rules, data residency, languages (RW1–RW14)
 M4   POS terminal apps: offline-first selling UI on top of the Sales core
 M5   Payments: provider abstraction, pre-auth tabs, tips, refunds, settlement postings
 M6   Purchasing, receiving, supplier invoices, three-way match, AP postings
@@ -67,6 +69,7 @@ M14  Hardening: security, performance, offline chaos tests, accessibility, usabi
 
 **Why this order.**
 - **The document engine (C0) comes just before the cores** because every event in them starts from a business document. It's a framework only; each core wires its own documents.
+- **The Rwanda pack (RW) comes right after the cores** because no terminal may issue a receipt in Rwanda without an RRA-signed EBM receipt.
 - **Finance comes first** among the cores because it is the reference every other module must reconcile to.
 - **Inventory comes second** because it holds most of the value and produces COGS.
 - **Sales comes third** because it depends on both.
@@ -84,14 +87,20 @@ Copy everything inside the block below into `CLAUDE.md` at the repository root.
 ````markdown
 # Unified POS + ERP Platform: Project Rules
 
-## Project facts (fill in; "TBD" if unknown)
-- Countries / tax jurisdictions: TBD
-- Currencies: TBD
-- Languages (staff UI and receipts): TBD
-- First pilot sites: TBD (e.g. 1 supermarket, 1 bar, 1 resto-bar)
-- Priority ERP / accounting connectors: TBD (e.g. Odoo, ERPNext, QuickBooks, Xero)
-- Priority payment providers / acquirers / mobile money: TBD
-- Fiscal / e-invoicing requirements: TBD
+## Project facts (first market: Rwanda; complete the TBDs)
+- Countries / tax jurisdictions: Rwanda (first market; see docs/concept-note.md Section 25). Other countries later, as country packs.
+- Tax authority and fiscal system: Rwanda Revenue Authority (RRA); electronic invoicing through EBM using an RRA-certified VSDC integration. Every sale and refund needs an RRA-signed receipt (NS/NR).
+- VAT: 18% standard; RRA tax types A (exempt), B (18%), C (zero-rated/export), D (not VAT-registered). Returns monthly, or quarterly for turnover ≤ RWF 200 million.
+- Currencies: RWF (0 decimal places) primary; USD optional.
+- Languages (staff UI and receipts): Kinyarwanda, English, French (Swahili optional).
+- Time zone: CAT (UTC+2), no daylight saving.
+- Accounting standard: IFRS for SMEs (IFRS for publicly accountable entities).
+- Record retention: at least 10 years for books, records, documents and EBM data.
+- Data residency: personal data of Rwandan tenants stored in Rwanda unless authorised otherwise (Law 058/2021).
+- Payments: mobile money first (MTN MoMo, Airtel Money; eKash interoperability and unified merchant codes); cards through a local acquirer: TBD which acquirer.
+- First pilot sites: TBD (e.g. 1 supermarket, 1 bar/lounge, 1 resto-bar with café in Kigali)
+- Priority ERP / accounting connectors: TBD (e.g. QuickBooks, Xero, Odoo, Sage)
+- Items marked "Confirm" in concept note Section 25 must be verified with RRA or a Rwandan tax adviser before go-live.
 
 ## What we are building
 A cloud-native, offline-first POS with an ERP-grade back office, for supermarkets, bars, resto-bars and cafés.
@@ -108,8 +117,9 @@ It runs in three deployment modes: standalone (Mode 1); POS front end on an exis
 - Every journal links to a source document. Posted entries are never edited or deleted; corrections go through the correction wizard (reversal, reclassification, amount correction) with reason, approval and audit.
 - A posting that fails is never dropped: it is held in the finance issue inbox and shown as "unposted" until fixed.
 - The three-way reconciliation (23.3) runs nightly and in the test suite. Any failure is a bug or a finance issue, never ignored.
+- In Rwanda, no sale or refund is complete without an RRA-signed EBM receipt from the VSDC (concept note 25.2–25.4); tax per RRA tax type must equal the VSDC's figures to the franc.
 - Every core event starts from a typed business document from the document engine (concept note Section 24). Only billing, payment and adjustment documents post to the books; only delivery and stock documents move stock; commercial documents (PR, RFQ, quotation, proforma, PO, SO) never do either. Issued documents are never edited or deleted.
-- Process IDs: F1–F19 (finance), IN1–IN11 (inventory), SA1–SA12 (sales), DOC1–DOC12 (documents). Reference them in module READMEs and tests.
+- Process IDs: F1–F19 (finance), IN1–IN11 (inventory), SA1–SA12 (sales), DOC1–DOC12 (documents), RW1–RW14 (Rwanda). Reference them in module READMEs and tests.
 
 ## Memory in the repository
 - `docs/PROGRESS.md`: milestone status, what's done, what's next, known issues. Update it at the end of every work session and whenever a milestone task finishes.
@@ -197,8 +207,8 @@ Produce these files:
 3. docs/adr/0001... : one ADR for each key decision (stack, modular monolith, sync approach, money/quantity representation, tenancy isolation, event/outbox approach, device platforms, costing method support, how fiscal connectors plug in).
 
 4. docs/PROGRESS.md
-   - The milestone plan (M0, M1, C0, C1, M2, C2, C3, M4–M14; use the list in the prompt guide as a starting point and adjust if the design suggests a better order). For each milestone: goal, process IDs covered, acceptance criteria that can be verified, and the main risks.
-   - A traceability table mapping every process ID in the concept note (S1–S15, B1–B13, R1–R15, E1–E9, F1–F19, IN1–IN11, SA1–SA12, DOC1–DOC12) and every Section 7 subsection to the milestone that delivers it. Nothing may be left unmapped; mark items explicitly "Later" if they are out of the first release.
+   - The milestone plan (M0, M1, C0, C1, M2, C2, C3, RW, M4–M14; use the list in the prompt guide as a starting point and adjust if the design suggests a better order). For each milestone: goal, process IDs covered, acceptance criteria that can be verified, and the main risks.
+   - A traceability table mapping every process ID in the concept note (S1–S15, B1–B13, R1–R15, E1–E9, F1–F19, IN1–IN11, SA1–SA12, DOC1–DOC12, RW1–RW14) and every Section 7 subsection to the milestone that delivers it. Nothing may be left unmapped; mark items explicitly "Later" if they are out of the first release.
 
 5. docs/open-questions.md
    - Decisions only the product owner can make (for example: jurisdictions and fiscal rules, first ERP connector, payment providers, which costing methods to support, data residency). For each, give your recommended default so work can proceed if I agree.
@@ -452,6 +462,53 @@ Done when:
 - The selling example in concept note 24.6 (50 cases to a restaurant on account, with a return) reproduces exactly in documents, stock and journals, and the document flow view shows the whole chain.
 ```
 
+### RW. Rwanda compliance pack (EBM/VSDC, tax, payments, data residency)
+
+Use effort `xhigh`. Run it after C3 and before M4, so the terminals print official EBM receipts from their first real use.
+
+```text
+[Standard opening]
+
+Milestone RW: Rwanda compliance pack. Concept note: Section 25 (all), 24.5, 10 (regulatory), 20.8 (F11 tax), 22 (SA1, SA2, SA4), 8.2 (offline).
+
+Rwanda is the first market. Deliver it as a country pack (configuration plus connectors) on top of the country-neutral cores, so later countries follow the same pattern.
+
+Before writing code:
+- Read the current RRA documents: the Technical Specification of CIS for VSDC, the VSDC specification, and the EBM user manual (links in the concept-note sources).
+- If a newer version exists, or if a document can't be accessed, tell me which versions you used and what you couldn't verify.
+- Build a checklist in docs/compliance/rwanda.md from concept note 25.1–25.9. Every rule has its source and a status: "confirmed from the specification", or "needs confirmation with RRA/tax adviser". Add the second kind to docs/open-questions.md.
+
+Build:
+- RW1: VSDC connector per the current specification: initialisation, code and reference data retrieval, item and branch registration, sales and refund transmission, purchase retrieval, import items, stock reporting where required, retries and idempotency. Include a VSDC simulator for tests and a certification test suite that mirrors RRA's integration checkpoints and runs in CI.
+- RW2: completeSale cannot complete a sale or refund without a VSDC signature. Store the SDC ID, SDC receipt number, internal data, receipt signature and MRC (or equivalents in the current specification) on the sales document. Print the receipt with every mandatory field and the QR code in the specified format.
+- RW3: tax types A, B (18%), C and D on items and services; tax totals per type calculated exactly as the VSDC does (rounding confirmed against the specification and simulator).
+- RW4/RW5: RRA item classification, packaging and quantity unit codes on the catalogue; customer TIN on B2B invoices; purchase invoices from EBM flowing into supplier-invoice matching.
+- RW6: mapping of our documents to EBM receipt types exactly as in 25.3, including:
+  - NR refunds referencing the original receipt;
+  - CS/CR copies on reprint;
+  - TS/TR in training mode;
+  - PS for proformas;
+  - the TIN entered before sale completion;
+  - the "Confirm" items implemented behind configuration switches.
+- RW7: VSDC hosted on the store edge hub; connectivity monitoring with alerts at 12 and 18 hours; default blocking when no VSDC is reachable; daily reconciliation of platform receipts and tax per type with the VSDC, with differences raised as F15 issues.
+- RW8–RW10: Rwanda chart-of-accounts template (IFRS for SMEs); VAT return report (monthly or quarterly); withholding-tax handling on payment vouchers and receipts; tax calendar reminders.
+- RW11: mobile-money tenders: request-to-pay by phone number (MTN MoMo, Airtel Money), eKash unified merchant code/QR on the customer display, automatic confirmation, refunds where supported, settlement reconciliation. Use the providers' current official API documentation.
+- RW12: Rwandan payroll rules (PAYE bands, RSSB pension and maternity, CBHI) as dated configuration for payroll calculation or journal validation.
+- RW13: per-country data residency: Rwandan tenants' personal data stored in a Rwanda region/data centre (document the hosting option chosen in an ADR); processing register; consent and data-subject request tools; retention of at least 10 years for financial and EBM records.
+- RW14: Kinyarwanda, English and French for staff UI, receipts, invoices and reports; RWF with no decimals; +250 phone numbers; TIN validation; CAT time zone; Rwandan seed data (Kigali supermarket, bar/lounge, resto-bar with café).
+- VAT reward: one-tap capture of the customer's phone number on the customer display, printed on the EBM receipt.
+
+Out of scope: going live with RRA (that needs the business's own VSDC approval and RRA certification). Prepare the certification application pack in docs/compliance/rwanda-certification/.
+
+Done when:
+- The certification test suite passes against the VSDC simulator (and against the RRA test environment if access is available).
+- Every EBM receipt type in 25.3 is produced correctly.
+- The Rwanda examples in 25.10 reproduce exactly (MoMo bar sale; B2B NS with TIN).
+- Tax per type matches the VSDC to the franc on a seeded month.
+- A 20-hour VSDC internet outage at the edge hub triggers the alerts without losing a sale.
+- docs/compliance/rwanda.md lists every rule with its source and status.
+```
+
 ### M4. POS terminal core (offline-first)
 
 ```text
@@ -470,7 +527,7 @@ Build:
 - Customer-facing display.
 - Environment themes: lane (scanner/keyboard-first), bar (dark, high-contrast, large targets), handheld (one-handed).
 - Training mode that never affects sales, stock or reports.
-- Documents: POS receipt, refund receipt, full tax invoice on request and Z-report printed or sent from the terminal, using the C0 templates and terminal-scoped number series (safe offline).
+- Documents: POS receipt, refund receipt, full tax invoice on request and Z-report printed or sent from the terminal, using the C0 templates and terminal-scoped number series (safe offline). In Rwanda, every receipt is the EBM receipt signed through the RW connector (NS/NR, with CS/CR on reprint and TS/TR in training mode); the till lets staff enter a buyer TIN or VAT-reward phone number before completing the sale.
 
 Out of scope: tabs, tables, KDS, promotions, scales.
 
@@ -488,7 +545,7 @@ Build:
 - Payment provider abstraction (ADR): authorise, capture, pre-authorise, incremental authorise, adjust tip, void, refund, store-and-forward offline with configured per-transaction and total limits, and settlement report import. Implement a full mock provider plus one real provider adapter chosen in docs/open-questions.md (or a sandbox-only adapter if none is chosen yet).
 - Terminal integration patterns: semi-integrated P2PE terminals and SoftPOS (tap to phone) via the provider SDK. Card data must never reach our code; store tokens, masked PAN and references only.
 - Tips: prompts, tip adjustment, auto-gratuity rules; data model for tip pooling (rules come in M8/M11).
-- Mobile money and QR payment adapter interface with a mock implementation.
+- Mobile money and QR payment adapter interface with a mock implementation. For Rwanda, implement MTN MoMo and Airtel Money request-to-pay and the eKash unified merchant code, if not already done in RW.
 - Settlement reconciliation: match provider settlements, fees and chargebacks to shifts and bank deposits; unmatched items queue.
 
 Finance: post tenders, tips, settlements, fees and chargebacks through the Finance core clearing accounts (SA2, F8). Card-settlement reconciliation uses the C1 reconciliation framework.
@@ -759,7 +816,7 @@ Add a [ERP/POS/payment/aggregator] connector for [system]. Follow the connector 
 ### E.8 Add a country (tax and fiscal)
 
 ```text
-Add support for [country]. Research the current VAT/GST/sales-tax rules, rounding rules, receipt and invoice requirements, and fiscal device or e-invoicing obligations from official sources, and list the sources in docs/compliance/[country].md. Implement tax configuration and a fiscal connector plug-in behind the existing interface. Ask me before any legal interpretation that is ambiguous.
+Add support for [country], following the pattern of the Rwanda country pack (concept note Section 25, milestone RW). Research the current VAT/GST/sales-tax rules, rounding rules, receipt and invoice requirements, and fiscal device or e-invoicing obligations from official sources, and list the sources in docs/compliance/[country].md. Implement tax configuration and a fiscal connector plug-in behind the existing interface. Ask me before any legal interpretation that is ambiguous.
 ```
 
 ### E.9 Books accuracy drill (after C3, then monthly)
@@ -814,6 +871,7 @@ Report gaps with file:line references and fix them.
 | Core boundaries | Only the Finance, Inventory and Sales cores write journals, stock movements and balances; every other module goes through `postJournal`, `recordStockMovement` or `completeSale`. |
 | Three-way reconciliation | Sales ↔ Finance, Sales ↔ Inventory, Inventory ↔ Finance, Tenders ↔ Finance, Settlements ↔ Bank and Sub-ledgers ↔ GL all agree (concept note 23.3), per day and location. |
 | Books | Every book of original entry and ledger is a view over the one journal store; sub-ledgers equal control accounts; suspense is zero at every closed period; corrections are journals, never edits. |
+| Rwanda EBM | Every completed sale and refund in a Rwandan location has an RRA-signed NS or NR receipt; copies, training and proformas are never official and never post; platform totals and tax per RRA tax type equal the VSDC's figures daily. |
 | Documents | Issued documents are never edited or deleted; numbers are unique, and gapless where required; per line, invoiced ≤ delivered/received ≤ ordered (within tolerance); every stock movement and journal traces to a document of an allowed kind; commercial documents never post or move stock; every advance is allocated or shown as open. |
 | One event, three views | No completed sale exists without its stock movements and journal, and no journal from a sale exists without its sale. |
 | Payments | No card data stored; every authorisation is captured, voided or expired; tips adjust only within provider rules. |
@@ -845,6 +903,7 @@ Use this part if you have already started building from the earlier version of t
 | Area | Before | Now |
 |---|---|---|
 | Specification | Concept note v0.3 | Concept note **v0.5**: new Sections 19–23 (core pillars) and Section 24 (business documents), with process IDs F1–F19, IN1–IN11, SA1–SA12 and DOC1–DOC12. Sections 1–18 and IDs S, B, R and E are unchanged. |
+| Market | Country-neutral, facts "TBD" | **Rwanda first**: concept note Section 25, prefilled Project facts, milestone **RW** (EBM/VSDC, tax, mobile money, payroll, data residency, languages) after C3 |
 | Documents | Created ad hoc inside each milestone | **C0 document engine** before C1 (numbering, lifecycle, conversion, flow view, matching, payment terms, templates); each core and M6/M8/M9 wire their own documents (Section 24) |
 | Finance | Built late (M10), together with ERP connectors | Built **first** as core C1, with accounting books, ledgers, reconciliations, health checks, error correction, close and an owner view |
 | Inventory | M3 stock engine, with cost kept "for later finance posting" | Core **C2** (replaces M3): perpetual inventory that posts every movement to the books, with GRNI and inventory–finance reconciliation |
@@ -856,7 +915,7 @@ Use this part if you have already started building from the earlier version of t
 
 ### H.2 Update the repository files
 
-1. Replace `docs/concept-note.md` in your product repository with the new `POS_Concept_Note.md` (v0.5).
+1. Replace `docs/concept-note.md` in your product repository with the new `POS_Concept_Note.md` (v0.6). Replace the "Project facts" block in your `CLAUDE.md` with the Rwanda version from Part B.
 2. Add this section to your existing `CLAUDE.md`, directly after "What we are building":
 
 ````markdown
@@ -868,8 +927,9 @@ Use this part if you have already started building from the earlier version of t
 - Every journal links to a source document. Posted entries are never edited or deleted; corrections go through the correction wizard (reversal, reclassification, amount correction) with reason, approval and audit.
 - A posting that fails is never dropped: it is held in the finance issue inbox and shown as "unposted" until fixed.
 - The three-way reconciliation (23.3) runs nightly and in the test suite. Any failure is a bug or a finance issue, never ignored.
+- In Rwanda, no sale or refund is complete without an RRA-signed EBM receipt from the VSDC (concept note 25.2–25.4); tax per RRA tax type must equal the VSDC's figures to the franc.
 - Every core event starts from a typed business document from the document engine (concept note Section 24). Only billing, payment and adjustment documents post to the books; only delivery and stock documents move stock; commercial documents (PR, RFQ, quotation, proforma, PO, SO) never do either. Issued documents are never edited or deleted.
-- Process IDs: F1–F19 (finance), IN1–IN11 (inventory), SA1–SA12 (sales), DOC1–DOC12 (documents). Reference them in module READMEs and tests.
+- Process IDs: F1–F19 (finance), IN1–IN11 (inventory), SA1–SA12 (sales), DOC1–DOC12 (documents), RW1–RW14 (Rwanda). Reference them in module READMEs and tests.
 ````
 
 3. Commit these two changes on a new branch (for example `upgrade/core-pillars`) before running U0.
@@ -879,7 +939,7 @@ Use this part if you have already started building from the earlier version of t
 Use effort `xhigh`.
 
 ```text
-The specification has been upgraded. docs/concept-note.md is now v0.5: Finance, Inventory and Sales are the three core pillars (Sections 19–23), to be built in that order, with new process IDs F1–F19, IN1–IN11 and SA1–SA12. They rest on a document engine and complete buying and selling document flows (Section 24, DOC1–DOC12). CLAUDE.md has a new "Core pillars" section.
+The specification has been upgraded. docs/concept-note.md is now v0.6 (first market: Rwanda, Section 25): Finance, Inventory and Sales are the three core pillars (Sections 19–23), to be built in that order, with new process IDs F1–F19, IN1–IN11 and SA1–SA12. They rest on a document engine and complete buying and selling document flows (Section 24, DOC1–DOC12). CLAUDE.md has a new "Core pillars" section.
 
 Your task in this session is to assess the existing code against the upgraded specification and re-plan the work. Do not change application code yet.
 
@@ -887,7 +947,7 @@ Your task in this session is to assess the existing code against the upgraded sp
 
 2. Write docs/upgrade/core-pillars-assessment.md containing:
    - What exists today for finance, inventory and sales (modules, tables, APIs, tests), with file references.
-   - A gap analysis against F1–F19, IN1–IN11, SA1–SA12, DOC1–DOC12, the document catalogue and flows in Section 24, and the core contracts in 19.3. For each ID give a status (done / partial / missing / conflicts with the spec) and the evidence.
+   - A gap analysis against F1–F19, IN1–IN11, SA1–SA12, DOC1–DOC12, RW1–RW14 (Rwanda), the document catalogue and flows in Section 24, and the core contracts in 19.3. For each ID give a status (done / partial / missing / conflicts with the spec) and the evidence.
    - Boundary violations: every place where code outside the cores writes money, journal or stock data, or calculates totals that should come from the cores.
    - The data model changes needed and a migration approach for existing data, including backfilling journals and stock values for existing sales and movements, with a reconciliation proof that the backfill is complete and correct.
    - What to keep as is, what to refactor and what (if anything) to replace, with reasons. Prefer refactoring working code over rewriting it.
@@ -896,7 +956,7 @@ Your task in this session is to assess the existing code against the upgraded sp
 
 4. Update docs/PROGRESS.md: the new milestone order from the prompt guide (A.3, including C0), adapted to where this build actually is; the traceability table extended with the new IDs; and, for work finished under old milestones, what still needs to change.
 
-5. Reply with a short summary: the current state, the plan for C0 → C1 → C2 → C3 in this codebase, the main risks, and any product decisions I need to make.
+5. Reply with a short summary: the current state, the plan for C0 → C1 → C2 → C3 → RW in this codebase, the main risks, and any product decisions I need to make.
 ```
 
 ### H.4 Existing-build addendum for C0, C1, C2 and C3
@@ -911,6 +971,7 @@ This codebase already contains work from earlier milestones; see docs/upgrade/co
 
 | Where you are | What to run next |
 |---|---|
+| Any stage (Rwanda) | Run **RW** after C3 and before any terminal is used for real sales. If terminals already exist, RW adds EBM signing to them. Money handling must use whole Rwandan francs (0 decimals). If your code assumed 2 decimals for every currency, fix that in C1 with a migration. |
 | Any stage | Run **C0** before C1. If your code already has documents (orders, invoices, receipts), C0 becomes a refactor that moves them onto the engine and migrates their numbering and history. |
 | Prompt 0 and/or M0 done | U0 (short), then M1 → C0 → C1 → M2 → C2 → C3 → M4 → … |
 | M1 and/or M2 done | U0, then C0 → C1 → C2 → C3 (M2 is kept; C2 builds on it) |

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Document type** | Concept note (draft for discussion) |
-| **Version** | 0.5: adds **business documents and document flows** (Section 24): the full procurement → delivery → invoicing → payment cycle and the selling cycle, with each document's effect on stock and the books, and the document engine. v0.4 made **Finance, Inventory and Sales the three core pillars** of the platform (Sections 19–23): built-in accounting books, books health checks and error correction, perpetual inventory posted to the books, and a sales core with quick reports and insight-to-task. Sections 1–18 keep their numbers. v0.3 added management roles, users and usability for each service (Section 7) and the barista / coffee station process (R15). v0.2 added the process-by-process feature design and positioning over existing POS and ERP systems. |
+| **Version** | 0.6: sets **Rwanda as the first market** (Section 25): VAT, RRA electronic invoicing (EBM via VSDC), receipt types, VAT reward, record keeping, withholding tax, excise, IFRS for SMEs, payroll, mobile money over eKash, data residency and localisation. v0.5 added **business documents and document flows** (Section 24): the full procurement → delivery → invoicing → payment cycle and the selling cycle, with each document's effect on stock and the books, and the document engine. v0.4 made **Finance, Inventory and Sales the three core pillars** of the platform (Sections 19–23): built-in accounting books, books health checks and error correction, perpetual inventory posted to the books, and a sales core with quick reports and insight-to-task. Sections 1–18 keep their numbers. v0.3 added management roles, users and usability for each service (Section 7) and the barista / coffee station process (R15). v0.2 added the process-by-process feature design and positioning over existing POS and ERP systems. |
 | **Date** | September 2026 |
 | **Scope** | Point-of-sale (POS) and store-management platform for three verticals: supermarkets / grocery, bars / pubs / lounges, and resto-bars (restaurant + bar hybrids) |
 | **Basis** | (a) How these businesses run each process manually today; (b) the features of POS platforms in wide use (Toast, Square, Lightspeed, Clover, TouchBistro, Revel, Shift4/SkyTab, Oracle MICROS Simphony, NCR Voyix/Aloha, IT Retail, LOC, and bar-inventory tools such as BinWise and BevSpot); (c) the features of ERP systems with POS or retail modules (Odoo, ERPNext, LS Central on Microsoft Dynamics 365 Business Central, Microsoft Dynamics 365 Commerce, SAP, Oracle Retail Xstore). See **Sources**. |
@@ -49,6 +49,7 @@
 22. Sales core (SA1–SA12), working with Inventory and Finance
 23. How the three cores work together
 24. Business documents and document flows (DOC1–DOC12)
+25. Country profile: Rwanda (first market) (RW1–RW14)
 - Appendix A: Feature matrix by mode
 - Appendix B: Glossary
 - Sources
@@ -82,6 +83,8 @@ Every event in the cores starts from a **business document** (Section 24):
 - adjustments and statements of account.
 
 They link into complete flows for buying and selling (prepaid, postpaid and direct cash), so every figure can be traced back to its paperwork.
+
+**The first market is Rwanda** (Section 25). The platform is built to be certified with the Rwanda Revenue Authority's electronic invoicing system (EBM, through the VSDC), so every sale and refund produces an official signed receipt. It applies Rwandan VAT (18%, tax types A–D) and supports mobile money (MTN MoMo, Airtel Money over eKash) as a first-class payment method. It keeps records for the required 10 years and stores personal data in line with Rwanda's data protection law.
 
 Around the cores, the platform has shared modules (payments, customers, staff, reporting) and **three vertical modes**: Supermarket, Bar and Resto-bar. A business switches on one or more. Section 6 designs every major business process in detail: how it is done manually today, what existing POS and ERP systems provide, where the gaps are, and the specific features this platform will provide. Section 7 designs the system around **the people who manage and use it**: owners, store, bar and restaurant managers, supervisors, cashiers, bartenders, baristas, servers, chefs, storekeepers and accountants. It covers role-specific screens, permissions, approval limits, daily management routines, and usability in each working environment, from a dark, noisy bar to a hot kitchen or a busy checkout lane.
 
@@ -952,7 +955,7 @@ Each workplace has different physical conditions, so screens and devices are des
 **Regulatory**
 
 - Tax: VAT/GST/sales tax including multiple rates, exemptions and tax-inclusive pricing.
-- Fiscalisation / e-invoicing: many countries require POS systems to transmit invoices to the tax authority in real time or to use certified fiscal devices. The platform provides a pluggable fiscal-connector layer per country.
+- Fiscalisation / e-invoicing: many countries require POS systems to transmit invoices to the tax authority in real time or to use certified fiscal devices. The platform provides a pluggable fiscal-connector layer per country. **Rwanda** (first market) requires EBM receipts through an RRA-certified VSDC integration (Section 25).
 - Data protection: GDPR-style consent and data minimisation for customer data; clear retention policies.
 - Alcohol licensing: licensed hours, age verification, capacity and responsible-service records.
 - Weights and measures: certified scales for sale by weight; unit pricing on shelf labels where required.
@@ -1624,7 +1627,7 @@ Not every document is an invoice. The platform classifies documents by what they
 | **DOC7** | Payment terms and flows | Prepaid, postpaid (net days, end-of-month, instalments), cash on delivery, direct cash; early-payment discounts; advances and their allocation |
 | **DOC8** | Approvals and controls | Approval rules per document type and amount (from 7.5); segregation of duties (requester ≠ approver; receiver ≠ invoice approver) |
 | **DOC9** | Templates and legal content | Printable/PDF templates per country and language with mandatory legal fields (seller/buyer tax IDs, tax breakdown, fiscal codes, QR codes where required) |
-| **DOC10** | E-invoicing and sending | Send by email, WhatsApp, supplier/customer portal or EDI; structured e-invoice formats (for example, UBL/Peppol or the national format) through the fiscal connector (F11) |
+| **DOC10** | E-invoicing and sending (Rwanda: EBM receipts through the VSDC, Section 25) | Send by email, WhatsApp, supplier/customer portal or EDI; structured e-invoice formats (for example, UBL/Peppol or the national format) through the fiscal connector (F11) |
 | **DOC11** | Revisions and audit | PO and quotation revisions with version history; attachments (photos, signed delivery notes, supplier receipts); full audit trail |
 | **DOC12** | Statements and reminders | Customer and supplier statements of account; automatic payment reminders; supplier statement reconciliation (F8) |
 
@@ -1645,10 +1648,119 @@ Not every document is an invoice. The platform classifies documents by what they
 
 ---
 
+## 25. Country profile: Rwanda (first market) (RW1–RW14)
+
+> **Added in v0.6.** Rwanda is the first market. This section turns Rwandan tax, invoicing, payment, payroll, accounting and data-protection rules into platform requirements. The rest of the concept note stays country-neutral; Rwanda is delivered as a **country pack** of configuration and connectors, so other countries can be added the same way later.
+>
+> **Important:** this profile was compiled from public sources in September 2026 (listed at the end of the note). Tax rates, thresholds and RRA technical specifications change. Before go-live, every item marked **"Confirm"** must be checked with the Rwanda Revenue Authority (RRA), the current VSDC technical specification, and a Rwandan tax adviser or ICPAR-certified accountant. Rates are stored as dated configuration, never hard-coded.
+
+### 25.1 Summary of the rules that shape the product
+
+| Area | Rule (as found) | What it means for the platform |
+|---|---|---|
+| **Currency** | Rwandan franc (RWF). ISO 4217 defines **0 decimal places** for RWF | Money in RWF is stored in whole francs; rounding rules must match RRA's EBM calculations exactly. USD (2 decimals) supported for businesses that also invoice in dollars, with RWF equivalents for tax |
+| **VAT** | Standard rate **18%** (VAT Law No. 049/2023); some supplies exempt or zero-rated | Tax engine configured with the RRA tax types (25.2) |
+| **VAT registration** | Required when taxable turnover reaches **RWF 20 million in a year or RWF 5 million in a quarter** | Owner dashboard warns when a non-registered business approaches the threshold |
+| **VAT returns** | Monthly by the **15th** of the following month; **quarterly** for taxpayers with annual turnover ≤ RWF 200 million | Tax return report and reminders follow the business's filing frequency |
+| **Electronic invoicing (EBM)** | Every transaction must produce a fiscal receipt signed by an RRA-authorised Sales Data Controller (Tax Procedures Law No. 020/2023). Businesses with their own POS/ERP integrate through RRA's **Virtual Sales Data Controller (VSDC)**, after **RRA certification** of the integration | Built-in **EBM/VSDC connector** (25.2); certification is a project milestone |
+| **Official receipts** | Only **Normal Sale (NS)** and **Normal Refund (NR)** receipts are official; refunds/cancellations must reference the original receipt number | Document engine maps our documents to EBM receipt types (25.3) |
+| **VSDC offline limit** | If the VSDC has had no internet connection for **24 hours** after issuing a receipt signature, it stops issuing receipt numbers | Offline design must keep the VSDC connected (25.4) |
+| **VAT reward (Tengamara)** | Consumers registered for the scheme receive **10% of the VAT** on EBM invoices that carry their registered phone number | Till prompts for the customer's phone number in one tap and prints it on the EBM receipt |
+| **Record keeping** | Books and records kept for **10 years** from 1 January after the fiscal year they relate to (Tax Procedures Law 2023) | Retention of financial records, documents, audit and EBM data set to at least 10 years; no deletion before that |
+| **Withholding tax** | Includes **15%** on certain payments by residents, **5%** on goods imported for commercial use, and **3%** deducted by public institutions on contract payments (**Confirm** scope and exemptions) | Supplier and customer settings for WHT; WHT deducted on payment vouchers and received WHT certificates recorded against receivables |
+| **Excise duty** | Charged on beverages, e.g. beer and spirits at **40–70%** depending on product, soda and non-natural juices **39%**, natural juice **10%**; **digital tax stamps** being extended to beers and soft drinks (Sept 2026) | Bars and supermarkets mostly pay excise inside the purchase price; items carry an excise category for reporting; optional scan/verification of digital tax stamps at receiving (**Confirm** obligations for retailers) |
+| **Accounting standards** | Companies Act 2018; ICPAR sets standards consistent with IFRS. Private companies without public accountability apply **IFRS for SMEs** | Chart-of-accounts templates and financial statements aligned with IFRS for SMEs |
+| **Payroll (2025/26)** | PAYE monthly bands: RWF 0–60,000 at 0%; 60,001–100,000 at 10%; 100,001–200,000 at 20%; above 200,000 at 30%. RSSB pension **6% employee + 6% employer** (rising towards 2030); maternity **0.3% + 0.3%**; CBHI **0.5% of net pay** (**Confirm** current rates and any occupational-hazard contribution) | Payroll rules as dated configuration; payroll journals post to F13; tips and service charges handled per Rwandan practice (**Confirm** tax treatment) |
+| **Payments** | Very high mobile-money use (MTN MoMo, Airtel Money). Since July 2026, **eKash** (National Bank of Rwanda) is the single instant rail for interoperable transfers, with **unified merchant codes** across networks | Mobile money as a first-class tender: request-to-pay by phone number, unified merchant QR/code, automatic confirmation and settlement reconciliation |
+| **Data protection** | Law No. 058/2021: register with the supervisory authority (NCSA / Data Protection and Privacy Office) and hold a DPP certificate; **personal data must be stored in Rwanda** unless the entity holds authorisation to store it abroad | Rwandan tenants' personal data hosted in Rwanda, or the platform operator obtains authorisation; processing register; consent and data-subject rights |
+| **Time and language** | Central Africa Time (UTC+2, no daylight saving). Official languages Kinyarwanda, English, French; Swahili widely used | UI and receipts in Kinyarwanda, English and French (Swahili optional); business day cut-off per location |
+
+### 25.2 EBM integration through VSDC (RW1–RW5)
+
+The platform is a **Certified Invoicing System (CIS)** that talks to RRA through the VSDC. The VSDC exchanges sales, purchase and stock data between the platform and the RRA EBM server.
+
+| ID | Requirement | Details |
+|---|---|---|
+| **RW1** | VSDC connector and RRA certification | Implement the connector per the current *Technical Specification of CIS for VSDC* and *VSDC specification*; prepare the RRA integration application (specifications and the RRA checkpoint sheet); pass RRA testing; keep a certification test suite that runs on every release |
+| **RW2** | Fiscal receipt on every sale and refund | `completeSale` (SA1) cannot finish a sale until the VSDC returns the SDC ID, SDC receipt number, internal data and receipt signature. These are stored on the sales document, printed on the receipt, and encoded in the QR code (`ddmmyyyy#hhmmss#sdc_id#sdc_receipt_number#internal_data#receipt_signature`). Our own invoice number series (DOC1) is kept alongside |
+| **RW3** | Tax types | Items and services carry an RRA tax type: **A** exempt; **B** taxable at 18%; **C** zero-rated/export; **D** for taxpayers not registered for VAT. Receipt tax totals per type must equal the VSDC's calculation to the franc |
+| **RW4** | Master and reference data | Item registration with RRA item classification codes, packaging and quantity unit codes, and other standard codes retrieved from the VSDC; customer TIN lookup where available; branch and user registration as the specification requires |
+| **RW5** | Purchases, imports and stock reporting | Retrieve purchase invoices issued to the business's TIN through EBM and bring them into supplier invoice matching (F10, DOC6); import items declared at customs; report stock movements (stock in/out and stock master) as the VSDC specification requires for the taxpayer's type (**Confirm** exact obligations) |
+
+### 25.3 How our documents map to EBM receipts (RW6)
+
+| Our document (Section 24) | EBM receipt type | Rules |
+|---|---|---|
+| POS receipt (walk-in sale) | **NS**: Normal Sale | Official. Customer TIN optional for consumers; phone number for the VAT reward on request |
+| Tax invoice to a business customer | **NS** with the buyer's **TIN** | Buyer's TIN required so the buyer can claim input VAT; the sale then appears in the buyer's EBM purchases |
+| Full tax invoice on request (from a POS receipt) | **Confirm with RRA**: usually the NS receipt is issued with the buyer's TIN at the time of sale; if added later, the original may need to be refunded (NR) and reissued (NS) with the TIN | The till lets the cashier enter the TIN *before* completing the sale |
+| Refund receipt / credit note | **NR**: Normal Refund, referencing the original receipt number | Partial refunds per line; stock and books follow SA4 |
+| Debit note (seller's supplementary charge) | **NS** for the additional amount, referencing the original (**Confirm**) | Labelled as supplementary charge |
+| Reprint of a receipt | **CS / CR**: Copy of sale / refund | Marked "COPY"; never official |
+| Training mode (Section 7.8) | **TS / TR**: Training sale / refund | Never official; never posts to the books or stock |
+| Proforma invoice | **PS**: Proforma | Never official; never posts |
+| Advance payment | **Confirm** time-of-supply rules under VAT Law 049/2023: whether VAT and an NS receipt are due when the advance is received | The tax engine and document engine support both options; the Rwanda pack selects the confirmed one |
+| Cancelled sale | Not deleted: cancelled by an NR referencing the original | Never void a signed receipt silently |
+
+### 25.4 Offline operation with EBM (RW7)
+
+Offline selling (Section 8.2) must still produce signed fiscal receipts:
+- The VSDC runs on the **store edge hub** (a local server with UPS and a 4G/5G backup link), so terminals can sign receipts over the LAN when the cloud or the fibre line is down.
+- The platform monitors how long the VSDC has been without internet. It alerts the manager at 12 hours and the owner at 18 hours, well before the **24-hour** limit when the VSDC stops issuing receipt numbers.
+- If a terminal can't reach the VSDC at all, it doesn't issue unsigned receipts as if they were official. The default is to block completion and route the sale to another terminal. Whether any deferred-signing emergency mode is allowed must be **confirmed with RRA** before it is enabled.
+- EBM data is reconciled daily: receipts, totals and tax per type in the platform must equal what the VSDC reports. Differences appear in the books health checks (F15).
+
+### 25.5 Rwanda tax configuration in the Finance core (RW8–RW10)
+
+| ID | Requirement |
+|---|---|
+| **RW8** | Chart-of-accounts templates for Rwanda (IFRS for SMEs), including: VAT output and input by tax type, VAT payable/refundable, withholding tax payable and receivable, excise (for businesses that pay it directly), PAYE payable, RSSB pension and maternity payable, CBHI payable, mobile-money clearing accounts per provider, EBM variance/suspense |
+| **RW9** | VAT return report in the structure RRA's declaration requires (sales by tax type, purchases with supplier TINs and EBM references, input VAT, adjustments); monthly or quarterly according to the business's filing frequency; reminders before the 15th |
+| **RW10** | Withholding tax: flags on suppliers and customers; WHT deducted on payment vouchers with certificates; WHT suffered by the business recorded as a tax credit; monthly WHT report (**Confirm** rates, exemptions and filing format) |
+
+### 25.6 Payments in Rwanda (RW11)
+
+- **Mobile money first:** request-to-pay by phone number (MTN MoMo, Airtel Money), unified eKash merchant code/QR shown on the customer display, automatic payment confirmation, no manual "paid" button.
+- **Cards:** EMV and contactless through a local acquirer; SoftPOS where offered.
+- **Settlement reconciliation:** MoMo, Airtel Money, eKash and card settlements matched to clearing accounts and bank lines (F8, SA2), including fees.
+- **Refunds** to mobile money where the provider supports it; otherwise cash with an NR receipt.
+
+### 25.7 Payroll, tips and staff (RW12)
+
+- PAYE bands and RSSB, maternity and CBHI rates as dated configuration, for payroll calculation or for validating journals imported from a payroll provider (F13).
+- Casual and daily workers (common in bars and restaurants) supported with daily rates (**Confirm** PAYE and RSSB treatment of casual workers).
+- Tips and service charges tracked as liabilities and distributed per the tip-pool rules (B8), with their payroll and tax treatment per Rwandan rules (**Confirm**).
+
+### 25.8 Data protection and hosting (RW13)
+
+- Personal data of Rwandan tenants (customers, staff, loyalty members, phone numbers captured for VAT reward or mobile money) is stored in a data centre in Rwanda, unless the platform operator holds authorisation to store it abroad. The architecture must support per-country data residency.
+- The platform operator registers as data controller/processor and keeps the processing register; tenant businesses are guided through their own registration obligations.
+- Consent capture for marketing and loyalty; data-subject requests (access, correction, deletion, where not overridden by the 10-year tax record-keeping rule).
+
+### 25.9 Localisation (RW14)
+
+- Staff UI, receipts, invoices and reports in **Kinyarwanda, English and French** (Swahili optional), selectable per user and per customer.
+- Rwandan formats: dates (dd/mm/yyyy), RWF with no decimals and thousands separators, TIN format validation, Rwandan phone numbers (+250).
+- Time zone CAT (UTC+2); business day cut-off per location (bars trading past midnight).
+- Seed data and demo tenants with Rwandan examples: a Kigali supermarket, a bar/lounge and a resto-bar with café, with RWF prices, Rwandan suppliers and staff names in Kinyarwanda.
+
+### 25.10 Rwanda examples
+
+**A bar sale in Kigali, paid by MTN MoMo:** 2 bottles of beer at RWF 1,500 each, tax type B (18% VAT included).
+- Total RWF 3,000. VAT = 3,000 × 18/118 = 457.63, which rounds to **RWF 458**. Net sales **RWF 2,542**. (The rounding method must match the VSDC's calculation exactly; **confirm** whether VAT is rounded per line or per receipt.)
+- The customer pays by request-to-pay; the MoMo confirmation arrives; the VSDC signs the NS receipt; the receipt prints with the QR code and the customer's phone number for the VAT reward.
+- Journal: Dr MoMo clearing 3,000 · Cr Beverage sales 2,542 · Cr VAT output (type B) 458; Dr COGS beverage · Cr Inventory at cost.
+- Settlement: Dr Bank · Dr Mobile-money fees · Cr MoMo clearing 3,000.
+
+**A supermarket selling to a restaurant on account:** the tax invoice is an NS receipt with the restaurant's TIN. The sale appears in the restaurant's EBM purchases, and if that restaurant also uses this platform, it arrives in their supplier-invoice matching automatically (RW5).
+
+---
+
 ## Appendix A: Feature matrix by mode
 
 | Feature | Core | Supermarket | Bar | Resto-bar |
 |---|:---:|:---:|:---:|:---:|
+| **Rwanda country pack: EBM/VSDC fiscal receipts, RRA tax types, VAT reward, WHT, IFRS for SMEs, payroll, mobile money over eKash, data residency, Kinyarwanda/English/French (RW1–RW14)** | ● | ● | ● | ● |
 | **Document engine and flows: PR, RFQ, quotation, proforma, PO, SO, DN, GRN, invoices, credit/debit notes, payment vouchers, receipts, statements (DOC1–DOC12)** | ● | ● | ● | ● |
 | **Finance core: books, ledgers, reconciliations, health checks, close (F1–F19)** | ● | ● | ● | ● |
 | **Inventory core: perpetual stock posted to the books (IN1–IN11)** | ● | ● | ● | ● |
@@ -1710,6 +1822,8 @@ Not every document is an invoice. The platform classifies documents by what they
 - **DSR:** Daily sales report.
 - **E2EE / P2PE:** End-to-end / point-to-point encryption; card data is encrypted inside the payment terminal.
 - **EMV:** The global chip-card payment standard.
+- **EBM:** Electronic Billing Machine; Rwanda Revenue Authority's electronic invoicing system. Every sale must produce an EBM-signed receipt.
+- **eKash:** National Bank of Rwanda's instant payment system linking banks and mobile-money providers.
 - **ESL:** Electronic shelf label; a digital price tag updated from the POS.
 - **Expeditor (expo):** Person, or screen, that coordinates finished food and drinks so a table's order leaves together.
 - **FEFO / FIFO:** First-expired-first-out / first-in-first-out stock rotation.
@@ -1720,6 +1834,7 @@ Not every document is an invoice. The platform classifies documents by what they
 - **Imprest system:** A petty cash method where the float is topped up to a fixed amount after spending.
 - **Perpetual inventory:** Stock records updated with quantity and value at every movement, instead of only at periodic counts.
 - **Payment voucher:** An internal document that authorises and records a payment.
+- **NS / NR:** EBM Normal Sale / Normal Refund receipts, the only official EBM receipt types (others: CS/CR copies, TS/TR training, PS proforma).
 - **PLU:** Price look-up code, used for produce and weighted items.
 - **Proforma invoice:** A preliminary invoice showing what is expected to be charged; not an accounting document.
 - **Purchase requisition (PR):** An internal request to buy goods or services.
@@ -1732,12 +1847,15 @@ Not every document is an invoice. The platform classifies documents by what they
 - **Role template:** A predefined set of screens and permissions for a job role, adjustable per person.
 - **Posting engine:** The component that turns business documents into balanced journal entries using configured rules.
 - **Statement of account:** A periodic summary of invoices, credit notes, payments and the outstanding balance for one customer or supplier.
+- **RRA:** Rwanda Revenue Authority.
+- **SDC / VSDC:** (Virtual) Sales Data Controller; the RRA component that signs receipts and exchanges sales, purchase and stock data with RRA.
 - **SoftPOS:** Software that accepts contactless cards on an ordinary NFC phone or tablet.
 - **Suspense account:** A temporary account for amounts that can't yet be classified; must be cleared before a period closes.
 - **SUS (System Usability Scale):** A standard 10-question usability survey scored 0–100.
 - **System of record:** The system whose data is treated as the official version of a given object.
 - **Trial balance:** A list of all ledger balances; total debits must equal total credits.
 - **Tax invoice / commercial invoice:** The document that legally records the amount owed, including tax.
+- **TIN:** Taxpayer Identification Number.
 - **Three-way match:** Checking a supplier invoice against the purchase order and goods received note before paying.
 - **UoM:** Unit of measure.
 - **Variance:** The difference between the stock that should have been used (according to sales) and the stock actually used (according to counts).
@@ -1758,4 +1876,5 @@ Industry articles, vendor pages and documentation consulted in September 2026. F
 - Pricing: [Toast Pricing](https://pos.toasttab.com/pricing) · [Restaurant Velocity: Toast vs Square vs Lightspeed vs Clover vs TouchBistro vs Revel](https://restaurantvelocity.com/blog/best-restaurant-pos-systems/) · [Beancount.io: Toast vs Square vs Clover 2026](https://beancount.io/blog/2026/07/10/toast-square-clover-pos-system-guide) · [ECOSIRE: Odoo POS vs Square/Toast/Clover/Lightspeed 2026](https://ecosire.com/blog/odoo-pos-vs-square-toast-clover-lightspeed-2026)
 - Market data: [IHL Group: USA POS Terminal Market 2026](https://www.ihlservices.com/news/analyst-corner/2026/03/usa-pos-terminal-market-2026/) · [Straits Research: Cloud POS Market](https://straitsresearch.com/press-release/global-cloud-pos-market-trends) · [LocalExpress: Grocery POS Statistics 2026](https://www.localexpress.io/post/grocery-pos-system-integration-statistics) · [Business Research Insights: Grocery POS Market](https://www.businessresearchinsights.com/market-reports/grocery-pos-systems-market-116654)
 - Accounting books, errors and inventory accounting: [Achievable: Books of prime entry](https://achievable.me/define/books-of-prime-entry/) · [Thinka: Books of original entry and types of ledgers](https://www.thinka.ai/en-US/Senior-Secondary-HKDSE/Business-Accounting-and-Financial-Studies/Books-of-Original-Entry-and-Types-of-Ledgers) · [AdminAdvice: Bookkeeping journals and ledgers](https://adminadvice.com/bookkeeping-journals-and-ledgers) · [GeeksforGeeks: Types of errors in trial balance](https://www.geeksforgeeks.org/accountancy/types-of-errors-in-trial-balance/) · [InTime: Errors not revealed by a trial balance](https://intimeaccounting.com/blog/trial-balance/errors-not-revealed) · [WallStreetMojo: Trial balance errors](https://www.wallstreetmojo.com/trial-balance-errors/) · [NetSuite: Perpetual inventory](https://www.netsuite.com/portal/resource/articles/inventory-management/what-is-perpetual-inventory.shtml) · [AccountingCoach: Inventory and COGS](https://www.accountingcoach.com/inventory-and-cost-of-goods-sold/explanation) · [Cleverence: COGS in a perpetual inventory system](https://www.cleverence.com/articles/for-business/cost-of-goods-sold-perpetual-inventory-system-4729/)
+- Rwanda (Section 25): [RRA: About EBM](https://www.rra.gov.rw/en/about-ebm) · [RRA: Virtual Sales Data Controller](https://www.rra.gov.rw/en/ebm-electronic-billing-machine/content-under-ebm/virtual-sales-data-controller-vsdc) · [RRA: Technical specification of CIS for VSDC](https://www.rra.gov.rw/fileadmin/user_upload/CIS_for_VSDC_technical_Specifications_New.pdf) · [RRA: VSDC specification v1.0.4](https://www.rra.gov.rw/fileadmin/user_upload/vsdc_specification_document_v1.0.4__2022.pdf) · [RRA: EBM 2.1 user manual](https://www.rra.gov.rw/fileadmin/user_upload/EBM2.1_MANUAL_for_compute_and_tablet__english_version.pdf) · [RRA Tax Handbook: Electronic invoicing system](https://tax-handbook.rra.gov.rw/handbook/explanation-of-ebms/) · [RRA: 10% VAT reward on EBM invoices](https://www.rra.gov.rw/en/details?tx_news_pi1%5Baction%5D=detail&tx_news_pi1%5Bcontroller%5D=News&tx_news_pi1%5Bnews%5D=1786&cHash=1d63aedd9645c1b8f48fdc58199f40f1) · [RRA: Withholding taxes](https://www.rra.gov.rw/en/taxes-fees/domestic-taxes/withholding-taxes) · [RRA: Taxation procedures 2023](https://www.rra.gov.rw/fileadmin/user_upload/RRA_Taxation_Procedures_2023.pdf) · [EY: Rwanda new VAT law](https://www.ey.com/en_gl/technical/tax-alerts/rwanda-gazettes-new-law-on-value-added-tax) · [EY: Rwanda new Tax Procedures Law](https://www.ey.com/en_gl/technical/tax-alerts/rwanda-gazettes-new-tax-procedures-law) · [PwC: Rwanda other taxes](https://taxsummaries.pwc.com/rwanda/corporate/other-taxes) · [PwC: Rwanda withholding taxes](https://taxsummaries.pwc.com/rwanda/corporate/withholding-taxes) · [Top Africa News: digital tax stamps for beers and soft drinks](https://www.topafricanews.com/2026/09/18/rra-engages-major-brewers-on-digital-tax-stamps-for-beers-and-soft-drinks/) · [IFRS Foundation: Rwanda jurisdiction profile](https://www.ifrs.org/use-around-the-world/use-of-ifrs-standards-by-jurisdiction/view-jurisdiction/rwanda/) · [Rwanda PAYE guide 2026](https://www.countrytaxcalc.com/tax-guides/africa/rwanda-paye-guide-2026/) · [Playroll: Rwanda payroll](https://www.playroll.com/payroll/rwanda) · [DPO Rwanda: Cloud storage under the data protection law](https://dpo.gov.rw/news-and-updates/news/article/cloud-storage-under-rwandas-data-protection-law-what-you-need-to-know) · [RwandaLII: Law 058/2021](https://rwandalii.org/akn/rw/act/law/2021/58/eng@2021-10-15) · [TechAfrica News: eKash interoperability](https://techafricanews.com/2026/07/13/rwanda-launches-full-interoperability-on-ekash-national-payment-system/) · [Taarifa: unified merchant codes](https://taarifa.rw/2026/07/03/rwanda-unifies-mobile-money-payments-as-ekash-ends-network-specific-merchant-codes/)
 - Payments and security: [Bluefin: What is PCI DSS 4.0](https://www.bluefin.com/bluefin-news/what-is-pci-dss-4-0/) · [PCI SSC: SAQ P2PE v4.0](https://listings.pcisecuritystandards.org/documents/PCI-DSS-v4-0-SAQ-P2PE.pdf) · [Finix: In-Person Payments Guide](https://finix.com/resources/blogs/complete-guide-inpersonpaymentsprocessing-2025) · [EazyPay Tech: SoftPOS and PCI MPoC](https://eazypaytech.com/softpos-and-pci-mpoc-certification-demystified/)
